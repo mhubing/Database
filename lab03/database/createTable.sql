@@ -22,7 +22,7 @@ Create Table IF NOT EXISTS Department(
     leader_id char(18),
     Constraint PK_department Primary Key(id),
     Constraint FK_department1 Foreign Key(subbranch_name) References Subbranch(name)
-        ON DELETE SET NULL
+        ON DELETE RESTRICT
         ON UPDATE CASCADE
     -- Constraint FK_department2 Foreign Key(leader_id) References staff(id)
 );
@@ -40,7 +40,7 @@ Create Table IF NOT EXISTS Staff(
     hire_date date,
     Constraint PK_staff Primary Key(id),
     Constraint FK_staff1 Foreign Key(department_id) References Department(id)
-        ON DELETE SET NULL
+        ON DELETE RESTRICT
         ON UPDATE CASCADE
 );
 
@@ -131,8 +131,12 @@ Create Table IF NOT EXISTS AccessAccount(
     client_id char(18),
     least_recently_access datetime,
     Constraint PK_aa Primary Key(account_id, client_id),
-    Constraint FK_aa1 Foreign Key(account_id) References Account(id),
+    Constraint FK_aa1 Foreign Key(account_id) References Account(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
     Constraint FK_aa2 Foreign Key(client_id) References Client(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 
@@ -145,6 +149,8 @@ Create Table IF NOT EXISTS Loan(
     loan_amount decimal(20,2),
     Constraint PK_loan Primary Key(id),
     Constraint FK_loan1 Foreign Key(subbranch_name) References Subbranch(name)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 
@@ -157,6 +163,8 @@ Create Table IF NOT EXISTS PayLoan(
     pay_amount decimal(20,2),
     Constraint PK_pl Primary Key(loan_id, pay_date),
     Constraint FK_pl1 Foreign Key(loan_id) References Loan(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
 
 
@@ -167,6 +175,10 @@ Create Table IF NOT EXISTS ClientLoan(
     loan_id char(20),
     client_id char(18),
     Constraint PK_cl Primary Key(loan_id, client_id),
-    Constraint FK_cl1 Foreign Key(loan_id) References Loan(id),
+    Constraint FK_cl1 Foreign Key(loan_id) References Loan(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
     Constraint FK_cl2 Foreign Key(client_id) References Client(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
 );
