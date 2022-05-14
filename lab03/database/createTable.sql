@@ -1,6 +1,6 @@
 -- 创建基本表
 
--- 支行表 Subbranch
+-- 1.支行表 Subbranch
 Drop Table IF EXISTS Subbranch;
 
 Create Table IF NOT EXISTS Subbranch(
@@ -11,36 +11,24 @@ Create Table IF NOT EXISTS Subbranch(
 );
 
 
--- 客户表 Client
-Drop Table IF EXISTS Client;
+-- 2.部门表 Department
+Drop Table IF EXISTS Department;
 
-Create Table IF NOT EXISTS Client(
-    id char(18),
+Create Table IF NOT EXISTS Department(
+    id char(8),
     name varchar(20),
-    phone char(11),
-    address varchar(100),
-    staff_id char(8),
-    staff_type bool,
-    Constraint PK_client Primary Key(id),
-    Constraint FK_client1 Foreign Key(staff_id) References Staff(id)
+    type varchar(100),
+    subbranch_name varchar(20),
+    leader_id char(18),
+    Constraint PK_department Primary Key(id),
+    Constraint FK_department1 Foreign Key(subbranch_name) References Subbranch(name)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+    -- Constraint FK_department2 Foreign Key(leader_id) References staff(id)
 );
 
 
- -- 联系人表 Contact
-Drop Table IF EXISTS Contact;
-
-Create Table IF NOT EXISTS Contact(
-    client_id char(18),
-    name varchar(20),
-    phone char(11),
-    email varchar(50),
-    relation varchar(20),
-    Constraint PK_contact Primary Key(client_id, name),
-    Constraint FK_contact1 Foreign Key(client_id) References Client(id)
-);
-
-
--- 员工表 Staff
+-- 3.员工表 Staff
 Drop Table IF EXISTS Staff;
 
 Create Table IF NOT EXISTS Staff(
@@ -52,10 +40,52 @@ Create Table IF NOT EXISTS Staff(
     hire_date date,
     Constraint PK_staff Primary Key(id),
     Constraint FK_staff1 Foreign Key(department_id) References Department(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+-- 部门经理（外键）
+Alter Table Department
+    Add Constraint FK_department2 Foreign Key(leader_id) References staff(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE;
+
+
+
+-- 4.客户表 Client
+Drop Table IF EXISTS Client;
+
+Create Table IF NOT EXISTS Client(
+    id char(18),
+    name varchar(20),
+    phone char(11),
+    address varchar(100),
+    staff_id char(8),
+    staff_type bool,
+    Constraint PK_client Primary Key(id),
+    Constraint FK_client1 Foreign Key(staff_id) References Staff(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 );
 
 
--- 账户表 Account
+ -- 5.联系人表 Contact
+Drop Table IF EXISTS Contact;
+
+Create Table IF NOT EXISTS Contact(
+    client_id char(18),
+    name varchar(20),
+    phone char(11),
+    email varchar(50),
+    relation varchar(20),
+    Constraint PK_contact Primary Key(client_id, name),
+    Constraint FK_contact1 Foreign Key(client_id) References Client(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+
+-- 6.账户表 Account
 Drop Table IF EXISTS Account;
 
 Create Table IF NOT EXISTS Account(
@@ -66,7 +96,7 @@ Create Table IF NOT EXISTS Account(
 );
 
 
--- 储蓄账户表 SavingsAccount
+-- 7.储蓄账户表 SavingsAccount
 Drop Table IF EXISTS SavingsAccount;
 
 Create Table IF NOT EXISTS SavingsAccount(
@@ -75,10 +105,12 @@ Create Table IF NOT EXISTS SavingsAccount(
     currency_type varchar(20),
     Constraint PK_sa Primary Key(account_id),
     Constraint FK_sa1 Foreign Key(account_id) References Account(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
 );
 
 
--- 支票账户表 CheckingAccount
+-- 8.支票账户表 CheckingAccount
 Drop Table IF EXISTS CheckingAccount;
 
 Create Table IF NOT EXISTS CheckingAccount(
@@ -86,10 +118,12 @@ Create Table IF NOT EXISTS CheckingAccount(
     overdraft decimal(20,2),
     Constraint PK_ca Primary Key(account_id),
     Constraint FK_ca1 Foreign Key(account_id) References Account(id)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
 );
 
 
--- 访问账户表 AccessAccount
+-- 9.访问账户表 AccessAccount
 Drop Table IF EXISTS AccessAccount;
 
 Create Table IF NOT EXISTS AccessAccount(
@@ -102,22 +136,7 @@ Create Table IF NOT EXISTS AccessAccount(
 );
 
 
--- 部门表 Department
-Drop Table IF EXISTS Department;
-
-Create Table IF NOT EXISTS Department(
-    id char(8),
-    name varchar(20),
-    type varchar(100),
-    subbranch_name varchar(20),
-    leader_id char(18),
-    Constraint PK_department Primary Key(id),
-    Constraint FK_department1 Foreign Key(subbranch_name) References Subbranch(name),
-    Constraint FK_department2 Foreign Key(leader_id) References staff(id)
-);
-
-
--- 贷款表 Loan
+-- 10.贷款表 Loan
 Drop Table IF EXISTS Loan;
 
 Create Table IF NOT EXISTS Loan(
@@ -129,7 +148,7 @@ Create Table IF NOT EXISTS Loan(
 );
 
 
--- 支付贷款表 PayLoan
+-- 11.支付贷款表 PayLoan
 Drop Table IF EXISTS PayLoan;
 
 Create Table IF NOT EXISTS PayLoan(
@@ -141,7 +160,7 @@ Create Table IF NOT EXISTS PayLoan(
 );
 
 
--- 客户_贷款表 ClientLoan
+-- 12.客户_贷款表 ClientLoan
 Drop Table IF EXISTS ClientLoan;
 
 Create Table IF NOT EXISTS ClientLoan(
