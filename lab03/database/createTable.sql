@@ -17,7 +17,7 @@ Drop Table IF EXISTS Department;
 Create Table IF NOT EXISTS Department(
     id char(8),
     name varchar(20),
-    type varchar(100),
+    type varchar(30),
     subbranch_name varchar(20),
     leader_id char(18),
     Constraint PK_department Primary Key(id),
