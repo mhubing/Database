@@ -44,8 +44,8 @@ class Client(models.Model):
     address = models.CharField(max_length=100)
     staff_id = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="staff_id")
     staff_type_choices = [
-        ('ap', 'account principal'),
-        ('lp', 'loan principal'),
+        ('account_principal', 'account principal'),
+        ('loan_principal', 'loan principal'),
     ]
     staff_type = models.CharField(max_length=20, choices=staff_type_choices, blank=True)
 

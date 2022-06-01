@@ -1,3 +1,4 @@
+from pydoc import pager
 from django.urls import path
 
 from . import views
@@ -8,4 +9,4 @@ urlpatterns = [
     path('accounts', views.accounts, name='accounts_management'),
     path('loans', views.loans, name='loans_management'),
     path('statistics', views.statistics, name='business_statistics')
-]
+]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
