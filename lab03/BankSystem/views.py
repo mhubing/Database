@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import redirect, render
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -50,6 +51,35 @@ def add_client(request):
         )
         return redirect('./clients')
     return render(request, 'BankSystem/add_client.html')
+
+@csrf_exempt
+def del_client(request, client_id):
+    if request.method == "GET":
+        # client_id = request.GET.get('id')
+        obj_list = Client.objects.filter(id=client_id)
+        if not obj_list:
+            return HttpResponse("该用户不存在")
+        obj_list.delete()
+        return redirect('../../clients')
+    return render(request, 'BankSystem/clients.html', {'error': '删除失败'})
+
+@csrf_exempt
+def edit_client(request, client_id):
+    obj_list = Client.objects.filter(id = client_id).values('id', 'name', 'phone', 'address')
+    if not obj_list:
+        return HttpResponse("该用户不存在")
+    obj=obj_list[0] # 对其中一个数据进行编辑
+
+    if request.method == "POST":
+        Client.objects.all().filter(id=client_id).update(
+            name=request.POST.get('name'),
+            phone=request.POST.get('phone'),
+            address=request.POST.get('address'),
+            # staff_id_id = client_staff_id,
+            # staff_type = client_staff_type
+        )
+        return redirect('../../clients')
+    return render(request, 'BankSystem/edit_client.html', {'obj' : obj})
 
 
 def accounts(request):

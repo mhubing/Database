@@ -2,7 +2,7 @@
 {% load static %}
 <!-- 写入 client.html 中定义的 title -->
 {% block title %}
-    新增客户
+    编辑信息
 {% endblock title %}
 
 <!-- 写入 base.html 中定义的 content -->
@@ -10,10 +10,10 @@
 
 <body>
     <form action="" method="POST" class="container">
-        <p>身份证号 <input type="text" name="id">{{ error }}</p>
-        <p>姓名    <input type="text" name="name"></p>
-        <p>电话    <input type="text" name="phone"></p>
-        <p>家庭地址 <input type="text" name="address"></p>
+        <p>身份证号: <input type="text" name="name" value="{{ obj.id }}"></p>
+        <p>姓名:    <input type="text" name="name" value="{{ obj.name }}"></p>
+        <p>电话:    <input type="text" name="phone"></p>
+        <p>家庭地址: <input type="text" name="address"></p>
         <!-- <p>负责人<input type="staff" name="principal"></p> -->
         <!-- <p>负责人类型<input type="text" name="principal_type"></p> -->
         
