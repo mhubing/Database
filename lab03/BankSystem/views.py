@@ -87,8 +87,13 @@ def edit_client(request, client_id):
         return HttpResponse("该用户不存在")
     obj=obj_list[0]
 
+    contacts=Contact.objects.filter(client_id = client_id)
+    if contacts:
+        return HttpResponse("该用户存在关联信息，不能修改身份证号")
+
     if request.method == "POST":
         Client.objects.all().filter(id=client_id).update(
+            id=request.POST.get('client_id'),
             name=request.POST.get('client_name'),
             phone=request.POST.get('client_phone'),
             address=request.POST.get('client_address'),
