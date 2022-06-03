@@ -3,6 +3,7 @@ from django.urls import path
 
 from . import views
 
+app_name = 'BankSystem'
 urlpatterns = [
     path('', views.home, name='home'),
     path('clients', views.clients, name='clients_management'),
@@ -13,6 +14,7 @@ urlpatterns = [
     path('clients/contacts/<client_id>', views.contacts, name="contacts"),
     path('clients/add_contact/<client_id>', views.add_contact, name="add_contact"),
     path('clients/del_contact/<client_id>/<contact_name>', views.del_contact, name="del_contact"),
+    path('clients/edit_contact/<client_id>/<contact_name>', views.edit_contact, name="edit_contact"),
     path('accounts', views.accounts, name='accounts_management'),
     path('loans', views.loans, name='loans_management'),
     path('statistics', views.statistics, name='business_statistics'),

@@ -18,14 +18,14 @@
             <div class="form-row field-id">
                 <div>
                     <label>客户:</label>
-                    <input type="text" name="client_id" readonly="readonly" value="{{client_id}}">{{ error }}
+                    <input type="text" name="client_id" readonly="readonly" value="{{client_id}}">
                 </div>
             </div>
 
             <div class="form-row field-name">
                 <div>
                     <label>联系人姓名:</label>
-                    <input type="text" name="contact_name" class="vTextField" maxlength="20">
+                    <input type="text" name="contact_name" class="vTextField" maxlength="20">{{ error }}
                 </div>
             </div>
 
@@ -51,6 +51,7 @@
             </div>
 
             <button>保存</button>
+            <a class="btn btn-light" href="/clients/contacts/{{client_id}}">返回</a>
 
         </fieldset>
         </form>

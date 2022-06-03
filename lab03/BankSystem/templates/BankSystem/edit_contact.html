@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+    编辑信息
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<body>
+<div class="container">
+    <h1>联系人信息管理</h1>
+    <hr/>
+    <form action="" method="POST" class="container">
+        <fieldset class="module aligned">
+            <div class="form-row field-id">
+                <div>
+                    <label>客户:</label>
+                    <input type="text" name="client_id" value="{{ obj.client_id }}" readonly="readonly" class="vTextField" maxlength="18">
+                </div>
+            </div>
+
+            <div class="form-row field-name">
+                <div>
+                    <label>联系人姓名:</label>
+                    <input type="text" name="contact_name" value="{{ obj.name }}" class="vTextField">{{ error }}
+                </div>
+            </div>
+
+            <div class="form-row field-phone">
+                <div>
+                    <label>联系人电话:</label>
+                    <input type="text" name="contact_phone" value="{{ obj.phone }}" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-email">
+                <div>
+                    <label>联系人邮箱:</label>
+                    <input type="email" name="contact_email" value="{{ obj.email }}">
+                </div>
+            </div>
+
+            <div class="form-row field-staff_id">
+                <div>
+                    <label>与客户关系:</label>
+                    <input type="staff" name="contact_relation" value="{{ obj.relation }}" class="vTextField">
+                </div>
+            </div>
+
+            <button>保存</button>
+            <a class="btn btn-light" href="/clients/contacts/{{client_id}}">返回</a>
+    </form>
+    </hr>
+</div>
+
+</body>
+
+{% endblock content %}

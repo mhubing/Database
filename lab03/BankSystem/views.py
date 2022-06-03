@@ -1,10 +1,9 @@
-import re
+import email
+from http import client
 from django.shortcuts import redirect, render
-from rest_framework.views import APIView
-from rest_framework.response import Response
 # Create your views here.
-from django.http import HttpResponse, HttpRequest
-from django.db import models
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -22,9 +21,7 @@ def clients(request):
     # 获取全部客户信息，显示在前端
     if request.method == "GET":
         clients = Client.objects.all()
-        # context = {'clients':clients}
-        contacts = Contact.objects.all()
-        context = {'clients':clients, 'contacts': contacts}
+        context = {'clients':clients}
         return render(request, 'BankSystem/clients.html', context)
     
     # 根据查询框输入显示输出
@@ -49,10 +46,10 @@ def add_client(request):
     # 在数据库中插入数据
     if request.method == "POST":
         client_id=request.POST.get('client_id')
-        if Client.objects.filter(id = client_id):
-            return render(request, 'BankSystem/add_client.html', {'error': '该用户已存在'})
         if not client_id:
             return render(request, 'BankSystem/add_client.html', {'error': '输入不能为空'})
+        if Client.objects.filter(id = client_id):
+            return render(request, 'BankSystem/add_client.html', {'error': '该用户已存在'})
 
         client_name=request.POST.get('client_name')
         client_phone=request.POST.get('client_phone')
@@ -88,7 +85,7 @@ def edit_client(request, client_id):
     obj_list = Client.objects.filter(id = client_id).values('id', 'name', 'phone', 'address', 'staff_id', 'staff_type')
     if not obj_list:
         return HttpResponse("该用户不存在")
-    obj=obj_list[0] # 对其中一个数据进行编辑
+    obj=obj_list[0]
 
     if request.method == "POST":
         Client.objects.all().filter(id=client_id).update(
@@ -103,16 +100,26 @@ def edit_client(request, client_id):
 
 
 # 管理客户联系人
+@csrf_exempt
 def contacts(request, client_id):
     if request.method == "GET":
         obj_list = Client.objects.filter(id=client_id)
-        print("client_id: ", client_id)
         if not obj_list:
             return HttpResponse("该用户不存在")
         contacts = Contact.objects.filter(client_id = client_id)
-        context = {'contacts':contacts, 'client_id':client_id}
+        context = {'contacts':contacts, 'client_id': client_id}
         return render(request, 'BankSystem/contacts.html', context)
     # 查询
+    if request.method == "POST":
+        contact_name=request.POST.get('contact_name')
+        print("contact_name: ", contact_name)
+        if not contact_name:
+            contacts = Contact.objects.filter(client_id = client_id)
+        else:
+            contacts = Contact.objects.filter(**{'name':contact_name, 'client_id':client_id})
+        context = {'contacts':contacts, 'client_id': client_id}
+        return render(request, 'BankSystem/contacts.html', context)
+
 
 @csrf_exempt
 def add_contact(request, client_id):
@@ -122,6 +129,10 @@ def add_contact(request, client_id):
 
     if request.method == "POST":
         contact_name = request.POST.get('contact_name')
+        if not contact_name:
+            return render(request, 'BankSystem/add_contact.html', {'error': '输入不能为空', 'client_id': client_id})
+        if Contact.objects.filter(**{'name':contact_name, 'client_id':client_id}):
+            return render(request, 'BankSystem/add_contact.html', {'error': '该联系人已存在', 'client_id': client_id})
         contact_phone = request.POST.get('contact_phone')
         contact_email = request.POST.get('contact_email')
         contact_relation = request.POST.get("contact_relation")
@@ -133,7 +144,9 @@ def add_contact(request, client_id):
             email = contact_email,
             relation = contact_relation,
         )
-        return redirect('../contacts', client_id = client_id)
+        # return redirect('../contacts')
+        url = '/clients/contacts/'+client_id
+        return HttpResponseRedirect(url)
     return render(request, 'BankSystem/add_contact.html', {'client_id': client_id})
 
     
@@ -143,24 +156,57 @@ def del_contact(request, client_id, contact_name):
         obj_list = Client.objects.filter(id=client_id)
         if not obj_list:
             return HttpResponse("该用户不存在")
-        condition={
-            'client_id': client_id,
-            'name': contact_name
-        }
-        contacts = Contact.objects.filter(**condition)
+        contacts = Contact.objects.filter(**{'client_id': client_id, 'name': contact_name})
         if not contacts:
             return HttpResponse("该联系人不存在")
 
         contacts.delete()
-        return redirect('../../contacts', client_id = client_id)
-    return render(request, 'BankSystem/contacts.html', {'error': '删除失败'})
+        url = '/clients/contacts/'+client_id
+        return HttpResponseRedirect(url)
+    return render(request, 'BankSystem/contacts.html', {'client_id': client_id, 'error': '删除失败'})
 
-        
+
+@csrf_exempt
+def edit_contact(request, client_id, contact_name):
+    obj_list = Client.objects.filter(id = client_id)
+    if not obj_list:
+        return HttpResponse("该用户不存在")
+    obj_list = Contact.objects.filter(**{'name':contact_name, 'client_id':client_id}).values('client_id', 'name', 'phone', 'email', 'relation')
+    if not obj_list:
+        return HttpResponse("该联系人不存在")
+    obj = obj_list[0]
     
+    if request.method == "POST":
+        contact_name_=request.POST.get('contact_name')
+        if not contact_name_:
+            return render(request, 'BankSystem/edit_contact.html', {'error': '输入不能为空', 'client_id': client_id, 'contact_name':contact_name})
+        contact_phone=request.POST.get('contact_phone')
+        contact_email=request.POST.get('contact_email')
+        contact_relation = request.POST.get('contact_relation')
+        Contact.objects.all().filter(**{'name':contact_name, 'client_id':client_id}).update(
+            name=contact_name_,
+            phone=contact_phone,
+            email=contact_email,
+            relation=contact_relation,
+        )
+        url = '/clients/contacts/'+client_id
+        return HttpResponseRedirect(url)
+    return render(request, 'BankSystem/edit_contact.html', {'obj':obj, 'client_id': client_id, 'contact_name':contact_name})
+
+
 
 
 def accounts(request):
+    # 获取全部客户信息，显示在前端
+    if request.method == "GET":
+        clients = Client.objects.all()
+        # context = {'clients':clients}
+        contacts = Contact.objects.all()
+        context = {'clients':clients, 'contacts': contacts}
+        return render(request, 'BankSystem/clients.html', context)
+
     return HttpResponse("need to finish account management.")
+
 
 def loans(request):
     return HttpResponse("need to finish loan management.")
