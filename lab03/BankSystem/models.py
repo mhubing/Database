@@ -1,3 +1,4 @@
+from asyncio import constants
 from datetime import date
 from locale import currency
 from operator import mod
@@ -151,3 +152,20 @@ class ClientLoan(models.Model):
             models.UniqueConstraint(fields=['loan_id', 'client_id'], name='ClientLoan Primary Key')
         ]
         db_table = "ClientLoan"
+
+
+# 13.支行-客户-账户类型表 SubbranchClientAccountType
+class SubbranchClientAccountType(models.Model):
+    subbranch_name = models.ForeignKey(Subbranch, on_delete=models.CASCADE, verbose_name="subbranch_name")
+    client_id = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client_id")
+    account_type_choices = [
+        ('saving_account', 'saving_account'),
+        ('loan_principal', 'loan principal'),
+    ]
+    account_type = models.CharField(max_length=20, choices=account_type_choices, null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['subbranch_name', 'client_id', 'account_type'], name='SCAT Primary key')
+        ]
+        db_table = "SubbranchClientAccountType"

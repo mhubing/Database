@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Client, Contact, Staff
+from .models import Account, Client, Contact, Staff
 
 
 def home(request):
@@ -204,10 +204,8 @@ def edit_contact(request, client_id, contact_name):
 def accounts(request):
     # 获取全部客户信息，显示在前端
     if request.method == "GET":
-        clients = Client.objects.all()
-        # context = {'clients':clients}
-        contacts = Contact.objects.all()
-        context = {'clients':clients, 'contacts': contacts}
+        accounts = Account.objects.all()
+        context = {'accounts':accounts}
         return render(request, 'BankSystem/clients.html', context)
 
     return HttpResponse("need to finish account management.")
