@@ -15,6 +15,7 @@ def home(request):
     return HttpResponse("need to finish HtteRequestRediction.")
     
 
+@csrf_exempt
 def clients(request):
 
     # 获取全部客户信息，显示在前端
@@ -23,21 +24,35 @@ def clients(request):
         context = {'clients':clients}
         return render(request, 'BankSystem/clients.html', context)
         
+    if request.method == "POST":
+        client_id=request.POST.get('client_id')
+        client_name=request.POST.get('client_name')
+        if not client_id:
+            query_id = Client.objects.all()
+        else:
+            query_id = Client.objects.filter(id = client_id)
+        if not client_name:
+            query_name = Client.objects.all()
+        else:
+            query_name = Client.objects.filter(name = client_name)
+        clients = query_id & query_name
+        context = {'clients':clients}
+        return render(request, 'BankSystem/clients.html', context)
     # return HttpResponse("need to finish client management.")
 
 @csrf_exempt
 def add_client(request):
     # 在数据库中插入数据
     if request.method == "POST":
-        client_id=request.POST.get('id')
+        client_id=request.POST.get('client_id')
         if Client.objects.filter(id = client_id):
             return render(request, 'BankSystem/add_client.html', {'error': '该用户已存在'})
         if not client_id:
             return render(request, 'BankSystem/add_client.html', {'error': '输入不能为空'})
 
-        client_name=request.POST.get('name')
-        client_phone=request.POST.get('phone')
-        client_address=request.POST.get('address')
+        client_name=request.POST.get('client_name')
+        client_phone=request.POST.get('client_phone')
+        client_address=request.POST.get('client_address')
         # client_staff_id=request.POST.get("staff_id"),
         # client_staff_type=request.POST.get("staff_type")
         
