@@ -9,17 +9,62 @@
 {% block content %}
 
 <body>
+<div class="container">
+    <h1>客户管理</h1>
+    <hr/>
     <form action="" method="POST" class="container">
-        <p>身份证号: <input type="text" name="name" value="{{ obj.id }}"></p>
-        <p>姓名:    <input type="text" name="name" value="{{ obj.name }}"></p>
-        <p>电话:    <input type="text" name="phone"></p>
-        <p>家庭地址: <input type="text" name="address"></p>
-        <!-- <p>负责人<input type="staff" name="principal"></p> -->
-        <!-- <p>负责人类型<input type="text" name="principal_type"></p> -->
-        
-        <button>提交</button>
-        <!-- <p><input type="submit" value="submit"></p>  -->
+        <fieldset class="module aligned">
+            <div class="form-row field-id">
+                <div>
+                    <label>身份证号:</label>
+                    <input type="text" name="client_id" value="{{ obj.id }}" class="vTextField" maxlength="18">{{ error }}
+                </div>
+            </div>
+
+            <div class="form-row field-name">
+                <div>
+                    <label>姓名:</label>
+                    <input type="text" name="client_name" value="{{ obj.name }}" class="vTextField" maxlength="20">
+                </div>
+            </div>
+
+            <div class="form-row field-phone">
+                <div>
+                    <label>电话:</label>
+                    <input type="text" name="client_phone" value="{{ obj.phone }}" class="vTextField" maxlength="22">
+                </div>
+            </div>
+
+            <div class="form-row field-address">
+                <div>
+                    <label>家庭地址:</label>
+                    <input type="text" name="client_address" value="{{ obj.address }}" class="vTextField" maxlength="100">
+                </div>
+            </div>
+
+            <div class="form-row field-staff_id">
+                <div>
+                    <label>负责人:</label>
+                    <input type="staff" name="client_staff_id" value="{{ obj.staff_id }}">
+                </div>
+            </div>
+
+            <div class="form-row field-staff_type">
+                <div>
+                    <label for="id_staff_type">负责人类型:</label>
+                    <select name="client_staff_type" id="id_staff_type" value="{{ obj.staff_type }}">
+                        <option value="" selected>---------请选择</option>
+                        <option value="account_principal">account principal</option>
+                        <option value="loan_principal">loan principal</option>
+                    </select>
+                </div>
+            </div>
+
+            <button>保存</button>
     </form>
+    </hr>
+</div>
+
 </body>
 
 {% endblock content %}

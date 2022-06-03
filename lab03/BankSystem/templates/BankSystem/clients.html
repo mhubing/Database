@@ -2,7 +2,7 @@
 {% load static %}
 <!-- 写入 client.html 中定义的 title -->
 {% block title %}
-    客户管理
+客户管理
 {% endblock title %}
 
 <!-- 写入 base.html 中定义的 content -->
@@ -50,6 +50,7 @@
                 <th>家庭地址</th>
                 <th>负责人</th>
                 <th>负责人类型</th>
+                <th>联系人</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -63,6 +64,8 @@
                 <td>{{ client.address }}</td>
                 <td>{{ client.staff_id }}</td>
                 <td>{{ client.staff_type }}</td>
+                <td><a  class="btn btn-link btn-sm"
+                    href="clients/contacts/{{client.id}}">管理联系人</a></td>
                 <td><a  class="btn btn-primary btn-sm"
                     href="clients/edit_client/{{client.id}}">编辑</a>
                     <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm"
