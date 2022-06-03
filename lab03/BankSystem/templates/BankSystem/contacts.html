@@ -14,9 +14,10 @@
     <hr/>
 
     <div style="float: left; margin-bottom: 10px">
-        <a class="btn btn-primary" href="">
+        <a class="btn btn-primary" href="/clients/add_contact/{{client_id}}">
             <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
-            新建联系人</a>
+            新建联系人
+        </a>
     </div>
     <form method="post">
         <div style="float: right; margin-bottom: 10px; width: 70px;">
@@ -25,7 +26,7 @@
         <div style="float: right;width: 10px;">&nbsp;</div>
         <div style="float: right; margin-bottom: 10px; width: 100px;">
             <div class="input-group">
-                <input type="text" style="border-radius: 5px;" name="client_name" class="form-control" placeholder="姓名"/>
+                <input type="text" style="border-radius: 5px;" name="contect_name" class="form-control" placeholder="姓名"/>
             </div>
         </div>
         <div style="float: right; margin-bottom: 10px; width: 20px;">
@@ -42,7 +43,7 @@
 
     <form action="" method="GET">
     <table class="container table stats-table table-striped table-bordered">
-        <caption>客户列表</caption>
+        <caption>联系人列表</caption>
         <thead>
             <tr>
                 <th>序号</th>
@@ -64,58 +65,16 @@
                 <td>{{ contact.email }}</td>
                 <td>{{ contact.relation }}</td>
                 <td><a  class="btn btn-primary btn-sm"
-                    href="clients/edit_client/{{client.id}}">编辑</a>
+                    href="/clients/edit_contact/{{client_id}}/{{contact.name}}">编辑</a>
                     <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm"
-                    href="clients/contects/edit_client/{{client.id}}">删除</a></td>
+                    href="/clients/del_contact/{{client_id}}/{{contact.name}}">删除</a></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
     </form>
 
-    <body>
-        <form action="" method="POST">
-        <fieldset class="module aligned">
-            <div class="form-row field-id">
-                <div>
-                    <label>客户:</label>
-                    <input type="text" name="client_id" readonly="readonly" value="{{client_id}}">{{ error }}
-                </div>
-            </div>
 
-            <div class="form-row field-name">
-                <div>
-                    <label>联系人姓名:</label>
-                    <input type="text" name="contact_name" class="vTextField" maxlength="20">
-                </div>
-            </div>
-
-            <div class="form-row field-phone">
-                <div>
-                    <label>联系人电话:</label>
-                    <input type="text" name="contact_phone" class="vTextField" maxlength="22">
-                </div>
-            </div>
-
-            <div class="form-row field-phone">
-                <div>
-                    <label>联系人email:</label>
-                    <input type="text" name="contact_email" class="vTextField">
-                </div>
-            </div>
-
-            <div class="form-row field-phone">
-                <div>
-                    <label>与客户关系:</label>
-                    <input type="text" name="contact_relation" class="vTextField">
-                </div>
-            </div>
-
-            <button>保存</button>
-
-        </fieldset>
-        </form>
-    </body>
     </hr>
 </div>
 

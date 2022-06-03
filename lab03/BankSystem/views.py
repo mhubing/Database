@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import Client, Contact, Staff
 
+
 def home(request):
     
     return HttpResponse("need to finish HtteRequestRediction.")
@@ -102,15 +103,22 @@ def edit_client(request, client_id):
 
 
 # 管理客户联系人
-@csrf_exempt
 def contacts(request, client_id):
-    # if request.method == "GET":
+    if request.method == "GET":
+        obj_list = Client.objects.filter(id=client_id)
+        print("client_id: ", client_id)
+        if not obj_list:
+            return HttpResponse("该用户不存在")
+        contacts = Contact.objects.filter(client_id = client_id)
+        context = {'contacts':contacts, 'client_id':client_id}
+        return render(request, 'BankSystem/contacts.html', context)
+    # 查询
+
+@csrf_exempt
+def add_contact(request, client_id):
     obj_list = Client.objects.filter(id=client_id)
-    print("client_id: ", client_id)
     if not obj_list:
-        return HttpResponse("该用户不存在")
-    contacts = Contact.objects.filter(client_id = client_id)
-    context = {'contacts':contacts, 'client_id':client_id}
+        return HttpResponse("该用户不存在")    
 
     if request.method == "POST":
         contact_name = request.POST.get('contact_name')
@@ -125,9 +133,27 @@ def contacts(request, client_id):
             email = contact_email,
             relation = contact_relation,
         )
-    
-    return render(request, 'BankSystem/contacts.html', context)
+        return redirect('../contacts', client_id = client_id)
+    return render(request, 'BankSystem/add_contact.html', {'client_id': client_id})
 
+    
+@csrf_exempt
+def del_contact(request, client_id, contact_name):
+    if request.method == "GET":
+        obj_list = Client.objects.filter(id=client_id)
+        if not obj_list:
+            return HttpResponse("该用户不存在")
+        condition={
+            'client_id': client_id,
+            'name': contact_name
+        }
+        contacts = Contact.objects.filter(**condition)
+        if not contacts:
+            return HttpResponse("该联系人不存在")
+
+        contacts.delete()
+        return redirect('../../contacts', client_id = client_id)
+    return render(request, 'BankSystem/contacts.html', {'error': '删除失败'})
 
         
     

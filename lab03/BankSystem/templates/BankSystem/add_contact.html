@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+新增客户
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<div class="container">
+    <h1>新建联系人</h1>
+    <hr/>
+
+    <body>
+        <form action="" method="POST">
+        <fieldset class="module aligned">
+            <div class="form-row field-id">
+                <div>
+                    <label>客户:</label>
+                    <input type="text" name="client_id" readonly="readonly" value="{{client_id}}">{{ error }}
+                </div>
+            </div>
+
+            <div class="form-row field-name">
+                <div>
+                    <label>联系人姓名:</label>
+                    <input type="text" name="contact_name" class="vTextField" maxlength="20">
+                </div>
+            </div>
+
+            <div class="form-row field-phone">
+                <div>
+                    <label>联系人电话:</label>
+                    <input type="text" name="contact_phone" class="vTextField" maxlength="22">
+                </div>
+            </div>
+
+            <div class="form-row field-phone">
+                <div>
+                    <label>联系人email:</label>
+                    <input type="text" name="contact_email" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-phone">
+                <div>
+                    <label>与客户关系:</label>
+                    <input type="text" name="contact_relation" class="vTextField">
+                </div>
+            </div>
+
+            <button>保存</button>
+
+        </fieldset>
+        </form>
+    </body>
+    </hr>
+</div>
+
+{% endblock content %}
