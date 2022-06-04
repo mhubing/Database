@@ -1,0 +1,70 @@
+<!-- 支票账户 -->
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+新增客户
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<div class="container">
+    <h1>新建支票账户</h1>
+    <hr/>
+    <body>
+        <form action="" method="POST">
+        <fieldset class="module aligned">
+            <div class="form-row field-subbranch_name">
+                <div>
+                    <label>银行名:</label>
+                    <input type="text" name="subbranch_name" class="vTextField">{{ error_sn }}
+                </div>
+            </div>
+
+            <div class="form-row field-client_id">
+                <div>
+                    <label>客户:</label>
+                    <input type="text" name="client_id" class="vTextField">{{ error_ci }}
+                </div>
+            </div>
+
+            <div class="form-row field-account_id">
+                <div>
+                    <label>账户号:</label>
+                    <input type="text" name="account_id" class="vTextField">{{ error_ai }}
+                </div>
+            </div>
+
+            <div class="form-row field-open_day">
+                <div>
+                    <label>开户日期:</label>
+                    <input type="date" name="open_day" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-account_balance">
+                <div>
+                    <label>账户余额:</label>
+                    <input type="text" name="account_balance">
+                </div>
+            </div>
+
+            <div class="form-row field-account_overdraft">
+                <div>
+                    <label>透支额:</label>
+                    <input type="text" name="account_overdraft">
+                </div>
+            </div>
+
+            <button>保存</button>
+            <a class="btn btn-light" href="/clients">返回</a>
+
+        </fieldset>
+        </form>
+    </body>
+    </hr>
+</div>
+
+
+{% endblock content %}

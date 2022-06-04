@@ -1,5 +1,8 @@
 import email
 from http import client
+from locale import currency
+from multiprocessing.dummy import current_process
+import re
 from django.shortcuts import redirect, render
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
@@ -8,7 +11,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 
-from .models import AccessAccount, Account, Client, Contact, Staff
+from .models import AccessAccount, Account, CheckingAccount, Client, Contact, SavingsAccount, Staff, Subbranch, SubbranchClientAccountType
 
 
 def home(request):
@@ -94,18 +97,21 @@ def edit_client(request, client_id):
     obj=obj_list[0]
 
     if request.method == "POST":
-        contacts=Contact.objects.filter(client_id = client_id)
         new_client_id = request.POST.get('client_id')
-        if contacts and (new_client_id != client_id) :
+        if (new_client_id != client_id) and Contact.objects.filter(client_id = client_id):
             return render(request, 'BankSystem/edit_client.html', {'obj' : obj, 'error': '该用户有关联信息，不能修改身份证号'})
-        Client.objects.all().filter(id=client_id).update(
-            id=new_client_id,
-            name=request.POST.get('client_name'),
-            phone=request.POST.get('client_phone'),
-            address=request.POST.get('client_address'),
-            staff_id = Staff.objects.get(id=request.POST.get("client_staff_id")),
-            staff_type = request.POST.get('client_staff_type')
-        )
+        if (new_client_id != client_id) and Client.objects.filter(id=new_client_id):
+            return render(request, 'BankSystem/edit_client.html', {'obj' : obj, 'error': '该身份证号已存在'})
+
+        with transaction.atomic():
+            Client.objects.all().filter(id=client_id).update(
+                id=new_client_id,
+                name=request.POST.get('client_name'),
+                phone=request.POST.get('client_phone'),
+                address=request.POST.get('client_address'),
+                staff_id = Staff.objects.get(id=request.POST.get("client_staff_id")),
+                staff_type = request.POST.get('client_staff_type')
+            )
         return redirect('../../clients')
     return render(request, 'BankSystem/edit_client.html', {'obj' : obj})
 
@@ -215,6 +221,101 @@ def accounts(request):
         return render(request, 'BankSystem/accounts.html', context)
 
     return HttpResponse("need to finish account management.")
+
+
+@csrf_exempt
+# 支票账户
+def add_checking(request):
+    if request.method == "POST":
+        subbranch_name = request.POST.get('subbranch_name')
+        if not subbranch_name:
+            return render(request, 'BankSystem/add_checking.html', {'error_sn': '输入不能为空'})
+        if not Subbranch.objects.filter(name = subbranch_name):
+            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该银行不存在'})
+        
+        client_id = request.POST.get('client_id')
+        if not client_id:
+            return render(request, 'BankSystem/add_checking.html', {'error_ci': '输入不能为空'})
+        if not Client.objects.filter(id = client_id):
+            return render(request, 'BankSystem/add_checking.html', {'error_ci': '该客户不存在'})
+
+        account_id = request.POST.get('account_id')
+        if not account_id:
+            return render(request, 'BankSystem/add_checking.html', {'error_ai': '输入不能为空'})
+        if Account.objects.filter(id = account_id):
+            return render(request, 'BankSystem/add_checking.html', {'error_ai': '该账户已存在'})
+
+        open_day = request.POST.get('open_day')
+        account_balance = request.POST.get('account_balance')
+        account_overdraft = request.POST.get('account_overdraft')
+
+        with transaction.atomic():
+            Account.objects.create(
+                id = account_id,
+                balanch = account_balance,
+                open_date = open_day,
+                account_type = 'checking_account',
+            )
+            CheckingAccount.objects.create(
+                account_id = Account.objects.get(id=account_id),
+                overdraft = account_overdraft,
+            )
+            SubbranchClientAccountType.objects.create(
+                subbranch_name = Subbranch.objects.get(name=subbranch_name),
+                client_id = Client.objects.get(id=client_id),
+                account_id = Account.objects.get(id=account_id),
+            )
+
+        return redirect('./accounts')
+    return render(request, 'BankSystem/add_checking.html')
+
+
+@csrf_exempt
+# 储蓄账户
+def add_savings(request):
+    if request.method == "POST":
+        subbranch_name = request.POST.get('subbranch_name')
+        if not subbranch_name:
+            return render(request, 'BankSystem/add_checking.html', {'error_sn': '输入不能为空'})
+        if not Subbranch.objects.filter(name = subbranch_name):
+            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该银行不存在'})
+        
+        client_id = request.POST.get('client_id')
+        if not client_id:
+            return render(request, 'BankSystem/add_checking.html', {'error_ci': '输入不能为空'})
+        if not Client.objects.filter(id = client_id):
+            return render(request, 'BankSystem/add_checking.html', {'error_ci': '该客户不存在'})
+
+        account_id = request.POST.get('account_id')
+        if not account_id:
+            return render(request, 'BankSystem/add_checking.html', {'error_ai': '输入不能为空'})
+        if Account.objects.filter(id = account_id):
+            return render(request, 'BankSystem/add_checking.html', {'error_ai': '该账户已存在'})
+
+        open_day = request.POST.get('open_day')
+        account_balance = request.POST.get('account_balance')
+        interest_rate = request.POST.get('interest_rate')
+        currency_type = request.POST.get('currency_type')
+
+        Account.objects.create(
+            id = account_id,
+            balanch = account_balance,
+            open_date = open_day,
+            account_type = 'savings_account',
+        )
+        SavingsAccount.objects.create(
+            account_id = Account.objects.get(id=account_id),
+            interest_rate = interest_rate,
+            currency_type = currency_type,
+        )
+        SubbranchClientAccountType.objects.create(
+            subbranch_name = Subbranch.objects.get(name=subbranch_name),
+            client_id = Client.objects.get(id=client_id),
+            account_id = Account.object.get(id=account_id),
+        )
+
+        return redirect('./accounts')
+    return render(request, 'BankSystem/add_savings.html')
 
 
 def loans(request):

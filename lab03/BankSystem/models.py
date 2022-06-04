@@ -2,6 +2,7 @@ from asyncio import constants
 from datetime import date
 from locale import currency
 from operator import mod
+from turtle import Turtle
 # from tkinter import CASCADE
 from django.db import models
 from django.forms import CharField, DecimalField
@@ -82,6 +83,11 @@ class Account(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     balanch = models.DecimalField(max_digits=20, decimal_places=2)
     open_date = models.DateTimeField(auto_now_add=True)
+    type_choices = [
+        ('savings_account', 'savings_account'),
+        ('checking_account', 'checking_account'),
+    ]
+    type = models.CharField(max_length=20, choices=type_choices)
 
     class Meta:
         db_table = "Account"
@@ -90,7 +96,7 @@ class Account(models.Model):
 # 7.储蓄账户表 SavingsAccount
 class SavingsAccount(models.Model):
     account_id = models.OneToOneField(Account, primary_key=True, on_delete=models.CASCADE, verbose_name="account_id")
-    interest_rate = models.DecimalField
+    interest_rate = models.DecimalField(max_digits=20, decimal_places=2)
     currency_type = models.CharField(max_length=20)
 
     class Meta:
@@ -164,8 +170,8 @@ class SubbranchClientAccountType(models.Model):
     subbranch_name = models.ForeignKey(Subbranch, on_delete=models.CASCADE, verbose_name="subbranch_name")
     client_id = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client_id")
     account_type_choices = [
-        ('saving_account', 'saving_account'),
-        ('loan_principal', 'loan principal'),
+        ('savings_account', 'savings_account'),
+        ('checking_account', 'checking_account'),
     ]
     account_type = models.CharField(max_length=20, choices=account_type_choices, null=True, blank=True)
 
