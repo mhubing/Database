@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Account, Client, Contact, Staff
+from .models import AccessAccount, Account, Client, Contact, Staff
 
 
 def home(request):
@@ -75,6 +75,10 @@ def del_client(request, client_id):
         obj_list = Client.objects.filter(id=client_id)
         if not obj_list:
             return HttpResponse("该用户不存在")
+        
+        account_list = AccessAccount.objects.filter(client_id=client_id)
+        if account_list:
+            return HttpResponse("该用户存在关联账户，不能删除")
         obj_list.delete()
         return redirect('../../clients')
     return render(request, 'BankSystem/clients.html', {'error': '删除失败'})

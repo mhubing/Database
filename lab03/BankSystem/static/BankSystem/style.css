@@ -3,3 +3,10 @@ li a {
 }
 
 label { display: block; width: 100px; }
+
+#homemidcontent {
+    background: #fff;
+    padding-right: 20px;
+    position: relative;
+    clear:both;
+}

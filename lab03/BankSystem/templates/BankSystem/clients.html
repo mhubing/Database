@@ -12,68 +12,74 @@
 <div class="container">
     <h1>客户管理</h1>
     <hr/>
-    <div style="float: left; margin-bottom: 10px">
+    <div style="margin-bottom: 10px;">
         <a class="btn btn-primary" href="/add_client">
             <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
             新建客户</a>
+        <div style="float: right">
+            <form method="post">
+                <div style="float: right; margin-bottom: 10px; width: 70px;">
+                    <input type="submit" value="查询" name="query" class="btn btn-primary input-sm"/>
+                </div>
+                <div style="float: right; width: 10px;">&nbsp;</div>
+                <div style="float: right; margin-bottom: 10px; width: 100px;">
+                    <div class="input-group">
+                        <input type="text" style="border-radius: 5px;" name="client_name" class="form-control" placeholder="姓名"/>
+                    </div>
+                </div>
+                <div style="float: right; margin-bottom: 10px; width: 20px;">
+                    <div style="position: relative;top: 5px; left: 5px">&</div>
+                </div>
+                <div style="float: right; margin-bottom: 10px; width: 100px;">
+                    <div class="input-group">
+                        <input type="text" style="border-radius: 5px;" name="client_id" class="form-control" placeholder="身份证号"/>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-    <form method="post">
-        <div style="float: right; margin-bottom: 10px; width: 70px;">
-            <input type="submit" value="查询" name="query" class="btn btn-primary input-sm"/>
+    <div style="float: none" class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fas fa-list-ul"></i>
+            客户列表
         </div>
-        <div style="float: right;width: 10px;">&nbsp;</div>
-        <div style="float: right; margin-bottom: 10px; width: 100px;">
-            <div class="input-group">
-                <input type="text" style="border-radius: 5px;" name="client_name" class="form-control" placeholder="姓名"/>
-            </div>
-        </div>
-        <div style="float: right; margin-bottom: 10px; width: 20px;">
-            <div style="position: relative;top: 5px; left: 5px">&</div>
-        </div>
-        <div style="float: right; margin-bottom: 10px; width: 100px;">
-            <div class="input-group">
-                <input type="text" style="border-radius: 5px;" name="client_id" class="form-control" placeholder="身份证号"/>
-            </div>
-        </div>
-                
-
-    </form>
-
-    <table class="container table stats-table table-striped table-bordered">
-        <caption>客户列表</caption>
-        <thead>
-            <tr>
-                <th>序号</th>
-                <th>身份证号</th>
-                <th>姓名</th>
-                <th>电话</th>
-                <th>家庭地址</th>
-                <th>负责人</th>
-                <th>负责人类型</th>
-                <th>联系人</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for client in clients %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ client.id }}</td>
-                <td>{{ client.name }}</td>
-                <td>{{ client.phone }}</td>
-                <td>{{ client.address }}</td>
-                <td>{{ client.staff_id }}</td>
-                <td>{{ client.staff_type }}</td>
-                <td><a  class="btn btn-link btn-sm"
-                    href="clients/contacts/{{client.id}}">管理联系人</a></td>
-                <td><a  class="btn btn-primary btn-sm"
-                    href="clients/edit_client/{{client.id}}">编辑</a>
-                    <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm"
-                    href="clients/del_client/{{ client.id }}">删除</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- 表格 -->
+        <table class="container table stats-table table-striped table-bordered">
+            <caption>客户列表</caption>
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>身份证号</th>
+                    <th>姓名</th>
+                    <th>电话</th>
+                    <th>家庭地址</th>
+                    <th>负责人</th>
+                    <th>负责人类型</th>
+                    <th>联系人</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ client.id }}</td>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.phone }}</td>
+                    <td>{{ client.address }}</td>
+                    <td>{{ client.staff_id }}</td>
+                    <td>{{ client.staff_type }}</td>
+                    <td><a  class="btn btn-link btn-sm"
+                        href="clients/contacts/{{client.id}}">管理联系人</a></td>
+                    <td><a  class="btn btn-primary btn-sm"
+                        href="clients/edit_client/{{client.id}}">编辑</a>
+                        <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm"
+                        href="clients/del_client/{{ client.id }}">删除</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>
