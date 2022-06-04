@@ -6,13 +6,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 
 from .models import AccessAccount, Account, Client, Contact, Staff
 
 
 def home(request):
     
-    return HttpResponse("need to finish HtteRequestRediction.")
+    return render(request, 'BankSystem/home.html')
     
 
 @csrf_exempt
@@ -57,6 +58,7 @@ def add_client(request):
         client_staff_id=request.POST.get("client_staff_id")
         client_staff_type=request.POST.get("client_staff_type")
         
+
         Client.objects.create(
             id = client_id,
             name = client_name,
@@ -91,13 +93,13 @@ def edit_client(request, client_id):
         return HttpResponse("该用户不存在")
     obj=obj_list[0]
 
-    contacts=Contact.objects.filter(client_id = client_id)
-    if contacts:
-        return HttpResponse("该用户存在关联信息，不能修改身份证号")
-
     if request.method == "POST":
+        contacts=Contact.objects.filter(client_id = client_id)
+        new_client_id = request.POST.get('client_id')
+        if contacts and (new_client_id != client_id) :
+            return render(request, 'BankSystem/edit_client.html', {'obj' : obj, 'error': '该用户有关联信息，不能修改身份证号'})
         Client.objects.all().filter(id=client_id).update(
-            id=request.POST.get('client_id'),
+            id=new_client_id,
             name=request.POST.get('client_name'),
             phone=request.POST.get('client_phone'),
             address=request.POST.get('client_address'),
@@ -204,13 +206,13 @@ def edit_contact(request, client_id, contact_name):
 
 
 
-
+@csrf_exempt
 def accounts(request):
     # 获取全部客户信息，显示在前端
     if request.method == "GET":
         accounts = Account.objects.all()
         context = {'accounts':accounts}
-        return render(request, 'BankSystem/clients.html', context)
+        return render(request, 'BankSystem/accounts.html', context)
 
     return HttpResponse("need to finish account management.")
 

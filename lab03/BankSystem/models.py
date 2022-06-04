@@ -36,7 +36,7 @@ class Department(models.Model):
 class Staff(models.Model):
     id = models.CharField(max_length=18, primary_key=True)
     name = models.CharField(max_length=20)
-    phone = models.CharField(max_length=11)
+    phone = models.CharField(max_length=11, unique=True)
     address = models.CharField(max_length=100)
     department_id = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="department_id")
     hire_date = models.DateField(default=date.today, editable=True)
@@ -49,7 +49,7 @@ class Staff(models.Model):
 class Client(models.Model):
     id = models.CharField(max_length=18, primary_key=True, )
     name = models.CharField(max_length=20)
-    phone = models.CharField(max_length=22)
+    phone = models.CharField(max_length=22, unique=True)
     address = models.CharField(max_length=100)
     staff_id = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="staff_id")
     staff_type_choices = [
@@ -66,8 +66,8 @@ class Client(models.Model):
 class Contact(models.Model):
     client_id = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client_id")
     name = models.CharField(max_length=20)
-    phone = models.CharField(max_length=11)
-    email = models.EmailField()
+    phone = models.CharField(max_length=22, unique=True)
+    email = models.EmailField(unique=True)
     relation = models.CharField(max_length=20)
 
     class Meta:
@@ -123,7 +123,12 @@ class AccessAccount(models.Model):
 class Loan(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     subbranch_name = models.ForeignKey(Subbranch, on_delete=models.CASCADE, verbose_name="subbranch_name")
-    loan_amount = DecimalField(max_digits=20, decimal_places=2)
+    loan_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0.0)
+    loan_status_choices = [
+        ('issuing', 'issuing'),
+        ('issued', 'issued'),
+    ]
+    loan_status = models.CharField(max_length=20, choices=loan_status_choices, default='issued')
 
     class Meta:
         db_table = "Loan"

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+主页
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<div class="container">
+    <h1>业务选择</h1>
+    <hr>
+    <a class="nav-link" href="/clients">客户管理</a>
+
+    <a class="nav-link" href="/accounts">账户管理</a>
+    </hr>
+</div>
+{% endblock content %}
