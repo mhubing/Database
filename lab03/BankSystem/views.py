@@ -57,6 +57,8 @@ def add_client(request):
 
         client_name=request.POST.get('client_name')
         client_phone=request.POST.get('client_phone')
+        if Client.objects.filter(phone = client_phone):
+            return render(request, 'BankSystem/add_client.html', {'error_ph': '该号码已存在'})
         client_address=request.POST.get('client_address')
         client_staff_id=request.POST.get("client_staff_id")
         client_staff_type=request.POST.get("client_staff_type")
@@ -70,7 +72,7 @@ def add_client(request):
             staff_id = Staff.objects.get(id=client_staff_id),
             staff_type = client_staff_type,
         )
-        return redirect('./clients')
+        return redirect('../clients')
     return render(request, 'BankSystem/add_client.html')
 
 
@@ -151,7 +153,11 @@ def add_contact(request, client_id):
         if Contact.objects.filter(**{'name':contact_name, 'client_id':client_id}):
             return render(request, 'BankSystem/add_contact.html', {'error': '该联系人已存在', 'client_id': client_id})
         contact_phone = request.POST.get('contact_phone')
+        if Contact.objects.filter(**{'phone':contact_phone}):
+            return render(request, 'BankSystem/add_contact.html', {'error_ph': '该号码已存在', 'client_id': client_id})
         contact_email = request.POST.get('contact_email')
+        if Contact.objects.filter(**{'email':contact_email}):
+            return render(request, 'BankSystem/add_contact.html', {'error_em': '该email已存在', 'client_id': client_id})
         contact_relation = request.POST.get("contact_relation")
         
         Contact.objects.create(
@@ -245,6 +251,9 @@ def add_checking(request):
         if Account.objects.filter(id = account_id):
             return render(request, 'BankSystem/add_checking.html', {'error_ai': '该账户已存在'})
 
+        if SubbranchClientAccountType.objects.filter(**{'subbranch_name': subbranch_name, 'client_id': client_id, 'account_type': 'checking_account'}):
+            return render(request, 'BankSystem/add_checking.html', {'error_scat': '客户在该支行已拥有支票账户'})
+
         open_day = request.POST.get('open_day')
         account_balance = request.POST.get('account_balance')
         account_overdraft = request.POST.get('account_overdraft')
@@ -252,9 +261,9 @@ def add_checking(request):
         with transaction.atomic():
             Account.objects.create(
                 id = account_id,
-                balanch = account_balance,
+                balance = account_balance,
                 open_date = open_day,
-                account_type = 'checking_account',
+                type = 'checking_account',
             )
             CheckingAccount.objects.create(
                 account_id = Account.objects.get(id=account_id),
@@ -263,10 +272,10 @@ def add_checking(request):
             SubbranchClientAccountType.objects.create(
                 subbranch_name = Subbranch.objects.get(name=subbranch_name),
                 client_id = Client.objects.get(id=client_id),
-                account_id = Account.objects.get(id=account_id),
+                account_type = 'checking_account'
             )
 
-        return redirect('./accounts')
+        return redirect('../accounts')
     return render(request, 'BankSystem/add_checking.html')
 
 
@@ -299,7 +308,7 @@ def add_savings(request):
 
         Account.objects.create(
             id = account_id,
-            balanch = account_balance,
+            balance = account_balance,
             open_date = open_day,
             account_type = 'savings_account',
         )

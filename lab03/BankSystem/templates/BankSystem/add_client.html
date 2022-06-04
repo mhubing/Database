@@ -31,7 +31,7 @@
             <div class="form-row field-phone">
                 <div>
                     <label>电话:</label>
-                    <input type="text" name="client_phone" class="vTextField" maxlength="22">
+                    <input type="text" name="client_phone" class="vTextField" maxlength="22">{{ error_ph }}
                 </div>
             </div>
 
@@ -54,8 +54,8 @@
                     <label for="id_staff_type">负责人类型:</label>
                     <select name="client_staff_type" id="staff_type">
                         <option value="" selected>---------请选择</option>
-                        <option value="account_principal">account principal</option>
-                        <option value="loan_principal">loan principal</option>
+                        <option value="账户负责人">account principal</option>
+                        <option value="贷款负责人">loan principal</option>
                     </select>
                 </div>
             </div>

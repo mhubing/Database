@@ -43,22 +43,31 @@
                 </div>
             </div>
 
+            <div class="form-row field-account_type">
+                <div>
+                    <label>账户类型:</label>
+                    <input type="text" name="account_type" readonly="readonly" value="支票账户" class="vTextField">
+                </div>
+            </div>
+
             <div class="form-row field-account_balance">
                 <div>
                     <label>账户余额:</label>
-                    <input type="text" name="account_balance">
+                    <input type="text" name="account_balance" value="0.0">
                 </div>
             </div>
 
             <div class="form-row field-account_overdraft">
                 <div>
-                    <label>透支额:</label>
+                    <label>透支额度:</label>
                     <input type="text" name="account_overdraft">
                 </div>
             </div>
 
             <button>保存</button>
             <a class="btn btn-light" href="/clients">返回</a>
+
+            <div style="color: red;">{{ error_scat }}</div>
 
         </fieldset>
         </form>
