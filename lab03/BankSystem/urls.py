@@ -28,5 +28,6 @@ urlpatterns = [
     path('loans', views.loans, name='loans_management'),
     path('loans/add_loan', views.add_loan, name="add_loan"),
     path('loans/add_clientloan/<loan_id>', views.add_clientloan, name="add_clientloan"),
+    path('loans/payloan/<loan_id>', views.payloan, name="payloan"),
     path('statistics', views.statistics, name='business_statistics'),
 ]

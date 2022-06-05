@@ -541,10 +541,32 @@ def add_loan(request):
     return render(request, 'BankSystem/add_loan.html')
 
 # 18.给贷款增加客户
+@csrf_exempt
 def add_clientloan(request, loan_id):
-    pass
+    subbranch = Loan.objects.get(id=loan_id).subbranch
+    if request.method == "POST":
+        client_id = request.POST.get('client_id')
+        if not client_id:
+            return render(request, 'BankSystem/add_clientloan.html', {'error': '输入不能为空'})
+        if not Client.objects.filter(id=client_id):
+            return render(request, 'BankSystem/add_clientloan.html', {'error_ci': '该客户不存在'})
 
-"""------------------贷款管理------------------"""
+        ClientLoan.objects.create(
+            loan = Loan.objects.get(id=loan_id),
+            client = Client.objects.get(id=client_id),
+        )
+        return redirect('../../loans')
+    return render(request, 'BankSystem/add_clientloan.html', {'subbranch':subbranch, 'loan_id': loan_id})
+
+# 19.发放贷款
+@csrf_exempt
+def payloan(request, loan_id):
+    if request.method == "POST":
+        
+        pass
+
+
+"""------------------业务统计------------------"""
 # 业务统计视图
 def statistics(request):
     return HttpResponse("need to finish business statistics.")

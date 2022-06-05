@@ -21,10 +21,10 @@
                 </div>
             </div>
 
-            <div class="form-row field-account_id">
+            <div class="form-row field-loan_id">
                 <div>
-                    <label>账户号:</label>
-                    <input type="text" name="account_id" value="{{account_id}}" readonly="readonly" class="vTextField">
+                    <label>贷款号:</label>
+                    <input type="text" name="loan_id" value="{{ loan_id }}" readonly="readonly" class="vTextField">
                 </div>
             </div>
 
@@ -35,15 +35,8 @@
                 </div>
             </div>
 
-            <div class="form-row field-lra">
-                <div>
-                    <label>添加时间:</label>
-                    <input type="datetime-local" name="lra" class="vTextField">
-                </div>
-            </div>
-
             <button>保存</button>
-            <a class="btn btn-light" href="/accounts">返回</a>
+            <a class="btn btn-light" href="/loans">返回</a>
 
         </fieldset>
         </form>
