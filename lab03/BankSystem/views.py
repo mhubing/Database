@@ -648,5 +648,6 @@ def del_loan(request, loan_id):
 """------------------业务统计------------------"""
 # 业务统计视图
 def statistics(request):
-    return HttpResponse("need to finish business statistics.")
+    # 合肥
+    return render(request, 'BankSystem/statistics.html')
 

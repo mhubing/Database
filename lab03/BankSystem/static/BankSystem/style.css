@@ -7,3 +7,9 @@ body {
 }
 
 label { display: inline-block; width: 150px;}
+
+.blank_row
+{
+    height: 20px !important; /* overwrites any other rules */
+    background-color: #FFFFFF;
+}

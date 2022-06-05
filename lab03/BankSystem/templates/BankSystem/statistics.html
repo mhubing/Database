@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+业务统计
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<body>
+<div class="container">
+    <h1><a href="/statistics" style="color: black;">业务统计</a></h1>
+    <hr/>
+
+    <div style="float: left; width: 45%" class="panel panel-default">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            储蓄-合肥支行
+        </div>
+        <!-- 表格 -->
+        <table class="container table stats-table table-striped table-bordered">
+            <caption>储蓄-合肥支行</caption>
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>月</th>
+                    <th>季</th>
+                    <th>年</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">总金额</th>
+                    <td>总金额/月</td>
+                    <td>总金额/季</td>
+                    <td>总金额/年</td>
+                </tr>
+                <tr>
+                    <th scope="row">用户数</th>
+                    <td>用户数/月</td>
+                    <td>用户数/季</td>
+                    <td>用户数/年</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div style="float: right; width: 45%" class="panel panel-default">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            贷款-合肥支行
+        </div>
+        <!-- 表格 -->
+        <table class="container table stats-table table-striped table-bordered">
+            <caption>贷款-合肥支行</caption>
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>月</th>
+                    <th>季</th>
+                    <th>年</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">总金额</th>
+                    <td>总金额/月</td>
+                    <td>总金额/季</td>
+                    <td>总金额/年</td>
+                </tr>
+                <tr>
+                    <th scope="row">用户数</th>
+                    <td>用户数/月</td>
+                    <td>用户数/季</td>
+                    <td>用户数/年</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <tr class="blank_row">
+        <td colspan="3"></td>
+    </tr>
+    
+    <div style="float: left; width: 45%" class="panel panel-default">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            储蓄-南阳支行
+        </div>
+        <!-- 表格 -->
+        <table class="container table stats-table table-striped table-bordered">
+            <caption>储蓄-南阳支行</caption>
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>月</th>
+                    <th>季</th>
+                    <th>年</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">总金额</th>
+                    <td>总金额/月</td>
+                    <td>总金额/季</td>
+                    <td>总金额/年</td>
+                </tr>
+                <tr>
+                    <th scope="row">用户数</th>
+                    <td>用户数/月</td>
+                    <td>用户数/季</td>
+                    <td>用户数/年</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="float: right; width: 45%" class="panel panel-default">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+            贷款-南阳支行
+        </div>
+        <!-- 表格 -->
+        <table class="container table stats-table table-striped table-bordered">
+            <caption>贷款-南阳支行</caption>
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>月</th>
+                    <th>季</th>
+                    <th>年</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">总金额</th>
+                    <td>总金额/月</td>
+                    <td>总金额/季</td>
+                    <td>总金额/年</td>
+                </tr>
+                <tr>
+                    <th scope="row">用户数</th>
+                    <td>用户数/月</td>
+                    <td>用户数/季</td>
+                    <td>用户数/年</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+
+{% endblock content %}
