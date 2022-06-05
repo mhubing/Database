@@ -67,9 +67,9 @@
                         <td>
                             {% if  loan.status == 'unissue' %}
                                 未开始发放
-                            {% elif  account.type == 'issuing' %}
+                            {% elif  loan.status == 'issuing' %}
                                 发放中
-                            {% elif  account.type == 'issued' %}
+                            {% elif  loan.status == 'issued' %}
                                 已全部发放
                             {% endif %}
                         </td>

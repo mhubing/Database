@@ -2,7 +2,8 @@ import math
 from http import client
 from locale import currency
 from multiprocessing.dummy import current_process
-import re
+from decimal import Decimal
+from re import L
 from typing import overload
 from django.shortcuts import redirect, render
 # Create your views here.
@@ -11,6 +12,7 @@ from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
+from django.db.models import Avg, Count, Min, Sum
 
 from .models import AccessAccount, Account, CheckingAccount, Client, Contact, SavingsAccount, Staff, Subbranch, SubbranchClientAccountType, Loan, PayLoan, ClientLoan
 
@@ -497,6 +499,7 @@ def loans(request):
         clientloans = ClientLoan.objects.all()
         return render(request, 'BankSystem/loans.html', {'loans':loans, 'payloans':payloans, "clientloans":clientloans})
     # 查询
+
     return HttpResponse("need to finish loan management.")
 
 # 17.新增贷款视图
@@ -517,9 +520,9 @@ def add_loan(request):
 
         client_id = request.POST.get('client_id')
         if not client_id:
-            return render(request, 'BankSystem/add_checking.html', {'error_ci': '输入不能为空'})
+            return render(request, 'BankSystem/add_loan.html', {'error_ci': '输入不能为空'})
         if not Client.objects.filter(id = client_id):
-            return render(request, 'BankSystem/add_checking.html', {'error_ci': '该客户不存在'})
+            return render(request, 'BankSystem/add_loan.html', {'error_ci': '该客户不存在'})
 
         loan_amount = request.POST.get('loan_amount')
         if not loan_amount:
@@ -561,9 +564,60 @@ def add_clientloan(request, loan_id):
 # 19.发放贷款
 @csrf_exempt
 def payloan(request, loan_id):
+    loan_status = Loan.objects.get(id=loan_id).status
+    loans = Loan.objects.all()
+    payloans = PayLoan.objects.all()
+    clientloans = ClientLoan.objects.all()
+    if loan_status == 'issued':
+        return render(request, 'BankSystem/loans.html', {'error_del': '该贷款已经全部发放', 'loans':loans, 'payloans':payloans, "clientloans":clientloans})
     if request.method == "POST":
-        
-        pass
+        pay_date = request.POST.get('pay_date')
+        pay_amount = request.POST.get('pay_amount')
+        if Decimal(pay_amount) <= Decimal(0):
+            return render(request, 'BankSystem/payloan.html', {'error_pa': '支付金额错误', 'loan_id': loan_id})
+
+        payloan_list = PayLoan.objects.filter(loan=Loan.objects.get(id=loan_id))
+        if payloan_list:
+            total_pay = Decimal(pay_amount)+Decimal(payloan_list.aggregate(Sum('pay_amount'))['pay_amount__sum'])
+        else:
+            total_pay = Decimal(pay_amount)
+        if total_pay > Loan.objects.get(id=loan_id).amount:
+            return render(request, 'BankSystem/payloan.html', {'error_pa': '支付金额超出贷款额度', 'loan_id': loan_id})
+        elif total_pay == Loan.objects.get(id=loan_id).amount:
+            loan_status = 'issued'
+        else:
+            loan_status = 'issuing'
+
+        with transaction.atomic():
+            PayLoan.objects.create(
+                loan = Loan.objects.get(id=loan_id),
+                pay_date = pay_date,
+                pay_amount = pay_amount,
+            )
+            Loan.objects.filter(id=loan_id).update(
+                status = loan_status,
+            )
+        return redirect('../../loans')
+    return render(request, 'BankSystem/payloan.html', {'loan_id': loan_id})
+
+# 20.删除贷款
+@csrf_exempt
+def del_loan(request, loan_id):
+    loans = Loan.objects.all()
+    payloans = PayLoan.objects.all()
+    clientloans = ClientLoan.objects.all()
+    if request.method == "GET":
+        loan_status = Loan.objects.get(id=loan_id).status
+        if loan_status=='issuing':
+            return render(request, 'BankSystem/loans.html', {'error_del': '该贷款正在支付中，无法删除', 'loans':loans, 'payloans':payloans, "clientloans":clientloans})
+        loan = Loan.objects.filter(id=loan_id)
+
+        with transaction.atomic():
+            PayLoan.objects.filter(loan__in=loan).delete()
+            Loan.objects.filter(id=loan_id).delete()
+
+        return redirect('../../loans')
+    return HttpResponse('删除失败')
 
 
 """------------------业务统计------------------"""

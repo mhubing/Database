@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+发放贷款
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<div class="container">
+    <h1>发放贷款</h1>
+    <hr/>
+    <body>
+        <form action="" method="POST">
+        <fieldset class="module aligned">
+
+            <div class="form-row field-loan_id">
+                <div>
+                    <label>贷款号:</label>
+                    <input type="text" name="loan_id" value="{{ loan_id }}" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-pay_date">
+                <div>
+                    <label>支付日期:</label>
+                    <input type="datetime-local" name="pay_date" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-loan_amount">
+                <div>
+                    <label>支付金额:</label>
+                    <input type="text" name="pay_amount" class="vTextField"> {{ error_pa }}
+                </div>
+            </div>
+
+            <button>保存</button>
+            <a class="btn btn-light" href="/loans">返回</a>
+
+        </fieldset>
+        </form>
+    </body>
+    </hr>
+</div>
+
+{% endblock content %}
