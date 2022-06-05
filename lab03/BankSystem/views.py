@@ -133,7 +133,6 @@ def contacts(request, client_id):
     # 查询
     if request.method == "POST":
         contact_name=request.POST.get('contact_name')
-        print("contact_name: ", contact_name)
         if not contact_name:
             contacts = Contact.objects.filter(client_id = client_id)
         else:
@@ -227,7 +226,24 @@ def accounts(request):
         accessaccounts = AccessAccount.objects.all()
         return render(request, 'BankSystem/accounts.html', {'accounts':accounts, 'accessaccounts':accessaccounts})
     # 查询
+    # TODO:根据用户id查询account
     if request.method == "POST":
+        account_id = request.POST.get('account_id')
+        client_id = request.POST.get('client_id')
+        if not account_id:
+            query_account = Account.objects.all()
+            query_account_aa = AccessAccount.objects.all()
+        else:
+            query_account = Account.objects.filter(id=account_id)
+            query_account_aa = AccessAccount.objects.filter(account_id=account_id)
+        if not client_id:
+            query_client_aa = AccessAccount.objects.all()
+        else:
+            query_client_aa = AccessAccount.objects.filter(client_id=client_id)
+        
+        accounts = query_account
+        accessaccounts = query_account_aa & query_client_aa
+        return render(request, 'BankSystem/accounts.html', {'accounts':accounts, 'accessaccounts':accessaccounts})
         
     return HttpResponse("need to finish account management.")
 
