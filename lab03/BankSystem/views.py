@@ -491,6 +491,7 @@ def del_clienttoaccount(request, account_id, client_id):
 
 """------------------贷款管理------------------"""
 # 16.贷款视图
+@csrf_exempt
 def loans(request):
     # 获取贷款信息，显示在前端
     if request.method == "GET":
@@ -499,6 +500,30 @@ def loans(request):
         clientloans = ClientLoan.objects.all()
         return render(request, 'BankSystem/loans.html', {'loans':loans, 'payloans':payloans, "clientloans":clientloans})
     # 查询
+    if request.method == "POST":
+        loan_id = request.POST.get('loan_id')
+        client_id = request.POST.get('client_id')
+        if not loan_id:
+            query_loans_li = Loan.objects.all()
+            query_payloans_li= PayLoan.objects.all()
+            query_clientloans_li = ClientLoan.objects.all()
+        else:
+            loan=Loan.objects.filter(id=loan_id)
+            query_loans_li = Loan.objects.filter(id=loan_id)
+            query_payloans_li= PayLoan.objects.filter(loan__in=loan)
+            query_clientloans_li = ClientLoan.objects.filter(loan__in=loan)
+
+        if not client_id:
+            query_clientloans_ci= ClientLoan.objects.all()
+        else:
+            client=Client.objects.filter(id=client_id)
+            query_clientloans_ci = ClientLoan.objects.filter(client__in=client)
+        
+        loans = query_loans_li
+        payloans = query_payloans_li
+        clientloans = query_clientloans_li & query_clientloans_ci
+        return render(request, 'BankSystem/loans.html', {'loans':loans, 'payloans':payloans, "clientloans":clientloans})
+       
 
     return HttpResponse("need to finish loan management.")
 
