@@ -3,6 +3,7 @@ from http import client
 from locale import currency
 from multiprocessing.dummy import current_process
 import re
+from typing import overload
 from django.shortcuts import redirect, render
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
@@ -83,7 +84,7 @@ def del_client(request, client_id):
         if not obj_list:
             return HttpResponse("该用户不存在")
         
-        account_list = AccessAccount.objects.filter(client_id=client_id)
+        account_list = SubbranchClientAccountType.objects.filter(client_id=client_id)
         if account_list:
             return HttpResponse("该用户存在关联账户，不能删除")
         obj_list.delete()
@@ -223,8 +224,7 @@ def accounts(request):
     # 获取全部客户信息，显示在前端
     if request.method == "GET":
         accounts = Account.objects.all()
-        context = {'accounts':accounts}
-        return render(request, 'BankSystem/accounts.html', context)
+        return render(request, 'BankSystem/accounts.html', {'accounts':accounts})
 
     return HttpResponse("need to finish account management.")
 
@@ -237,7 +237,7 @@ def add_checking(request):
         if not subbranch_name:
             return render(request, 'BankSystem/add_checking.html', {'error_sn': '输入不能为空'})
         if not Subbranch.objects.filter(name = subbranch_name):
-            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该银行不存在'})
+            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该支行不存在'})
         
         client_id = request.POST.get('client_id')
         if not client_id:
@@ -272,6 +272,7 @@ def add_checking(request):
             SubbranchClientAccountType.objects.create(
                 subbranch_name = Subbranch.objects.get(name=subbranch_name),
                 client_id = Client.objects.get(id=client_id),
+                account_id = Account.objects.get(id=account_id),
                 account_type = 'checking_account'
             )
 
@@ -287,7 +288,7 @@ def add_savings(request):
         if not subbranch_name:
             return render(request, 'BankSystem/add_checking.html', {'error_sn': '输入不能为空'})
         if not Subbranch.objects.filter(name = subbranch_name):
-            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该银行不存在'})
+            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该支行不存在'})
         
         client_id = request.POST.get('client_id')
         if not client_id:
@@ -301,31 +302,101 @@ def add_savings(request):
         if Account.objects.filter(id = account_id):
             return render(request, 'BankSystem/add_checking.html', {'error_ai': '该账户已存在'})
 
+        if SubbranchClientAccountType.objects.filter(**{'subbranch_name': subbranch_name, 'client_id': client_id, 'account_type': 'savings_account'}):
+            return render(request, 'BankSystem/add_savings.html', {'error_scat': '客户在该支行已拥有储蓄账户'})
+
         open_day = request.POST.get('open_day')
         account_balance = request.POST.get('account_balance')
         interest_rate = request.POST.get('interest_rate')
         currency_type = request.POST.get('currency_type')
 
-        Account.objects.create(
-            id = account_id,
-            balance = account_balance,
-            open_date = open_day,
-            account_type = 'savings_account',
-        )
-        SavingsAccount.objects.create(
-            account_id = Account.objects.get(id=account_id),
-            interest_rate = interest_rate,
-            currency_type = currency_type,
-        )
-        SubbranchClientAccountType.objects.create(
-            subbranch_name = Subbranch.objects.get(name=subbranch_name),
-            client_id = Client.objects.get(id=client_id),
-            account_id = Account.object.get(id=account_id),
-        )
+        with transaction.atomic():
+            Account.objects.create(
+                id = account_id,
+                balance = account_balance,
+                open_date = open_day,
+                type = 'savings_account',
+            )
+            SavingsAccount.objects.create(
+                account_id = Account.objects.get(id=account_id),
+                interest_rate = interest_rate,
+                currency_type = currency_type,
+            )
+            SubbranchClientAccountType.objects.create(
+                subbranch_name = Subbranch.objects.get(name=subbranch_name),
+                client_id = Client.objects.get(id=client_id),
+                account_id = Account.objects.get(id=account_id),
+                account_type = 'savings_account'
+            )
+            AccessAccount.objects.create(
+                client_id = Client.objects.get(id=client_id),
+                account_id = Account.objects.get(id=account_id),
+                least_recently_access = open_day,
+            )
 
-        return redirect('./accounts')
+        return redirect('../accounts')
     return render(request, 'BankSystem/add_savings.html')
 
+
+@csrf_exempt
+def del_account(request, account_id):
+    if request.method == "GET":
+        accounts=Account.objects.filter(id=account_id)
+        obj_list = Account.objects.filter(id=account_id).values('id', 'balance', 'open_date', 'type')
+        if not obj_list:
+            return HttpResponse("该账户不存在")
+        if obj_list[0]['type'] == 'checking_account' and obj_list[0]['balance'] < 0:
+            return render(request, 'BankSystem/accounts.html', {'error_del': '透支额未付清，删除支票帐户失败', 'accounts': accounts})
+
+        with transaction.atomic():
+            Account.objects.filter(id=account_id).delete()
+            SavingsAccount.objects.filter(account_id=account_id).delete()
+            CheckingAccount.objects.filter(account_id=account_id).delete()
+            SubbranchClientAccountType.objects.filter(account_id=account_id).delete()
+            AccessAccount.objects.filter(account_id).delete()
+
+        return redirect('../../accounts')
+    return render(request, 'BankSystem/accounts.html', {'error': '删除失败'})
+
+@csrf_exempt
+def edit_account(request, account_id):
+    obj_list = Account.objects.filter(id=account_id)
+    if not obj_list:
+        return HttpResponse("该帐号不存在")
+    obj=obj_list.first()
+    # 涉及到先反向查询，再正向
+    subbranch_list = Account.objects.get(id=account_id)
+    subbranch = subbranch_list.subbranchclientaccounttype_set.all().first().subbranch_name
+
+    if(request.method=="POST"):
+        account_balance = request.POST.get('account_balance')
+        lsa = request.POST.get('least_recently_access')
+        if obj['type'] == 'checking_account':
+            with transaction.atomic():
+                Account.objects.all().filter(id=account_id).update(
+                    balance = account_balance,
+                )
+                CheckingAccount.objects.all().filter(account_id=account_id).update(
+                    overdraft = request.POST.get('account_overdraft'),
+                )
+                AccessAccount.objects.all().filter(account_id=account_id).update(
+                    least_recently_access = lsa,
+                )
+        if obj['type'] == 'savings_account':
+            with transaction.atomic():
+                Account.objects.all().filter(id=account_id).update(
+                    balance = account_balance,
+                )
+                SavingsAccount.objects.all().filter(account_id=account_id).update(
+                    interest_rate = request.POST.get('interest_rate'),
+                    currency_type = request.POST.get('currency_type'),
+                )
+                AccessAccount.objects.all().filter(account_id=account_id).update(
+                    least_recently_access = lsa,
+                )
+        return redirect('../../accounts')
+    return render(request, 'BankSystem/edit_account.html', {'obj':obj, 'subbranch':subbranch})
+                    
 
 def loans(request):
     return HttpResponse("need to finish loan management.")

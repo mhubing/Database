@@ -18,6 +18,8 @@ urlpatterns = [
     path('accounts', views.accounts, name='accounts_management'),
     path('accounts/add_checking', views.add_checking, name="add_checking"),
     path('accounts/add_savings', views.add_savings, name="add_savings"),
+    path('accounts/edit_account/<account_id>', views.edit_account, name="edit_account"),
+    path('accounts/del_account/<account_id>', views.del_account, name="delete_account"),
     path('loans', views.loans, name='loans_management'),
     path('statistics', views.statistics, name='business_statistics'),
 ]

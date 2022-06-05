@@ -10,7 +10,7 @@
 
 <body>
     <div class="container">
-        <h1>账户管理</h1>
+        <h1><a href="/accounts" style="color: black;">账户管理</a></h1>
         <hr/>
         <div style="margin-bottom: 15px;">
             <a class="btn btn-primary" href="accounts/add_savings">
@@ -53,6 +53,7 @@
                     <tr>
                         <th>序号</th>
                         <th>账户号</th>
+                        <th>账户类型</th>
                         <th>余额</th>
                         <th>开户日期</th>
                         <th>操作</th>
@@ -63,17 +64,26 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ account.id }}</td>
+                        <td>
+                            {% if  account.type == 'checking_account' %}
+                                支票账户
+                            {% elif  account.type == 'savings_account' %}
+                                储蓄账户
+                            {% endif %}
+                        </td>
                         <td>{{ account.balance }}</td>
                         <td>{{ account.open_date }}</td>
-                        <td><a  class="btn btn-primary btn-sm" href="accounts/edit_account/{{ account.id }}">
+                        <td><a  class="btn btn-primary btn-sm" href="/accounts/edit_account/{{ account.id }}">
                             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> 编辑</a>
-                            <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm" href="accounts/del_account/{{ account.id }}">
+                            <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm" href="/accounts/del_account/{{ account.id }}">
                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> 销户</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <div style="color: red;">{{ error_del }}</div>
+
     </div>
     
     </body>

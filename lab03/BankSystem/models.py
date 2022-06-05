@@ -169,6 +169,7 @@ class ClientLoan(models.Model):
 class SubbranchClientAccountType(models.Model):
     subbranch_name = models.ForeignKey(Subbranch, on_delete=models.CASCADE, verbose_name="subbranch_name")
     client_id = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client_id")
+    account_id = models.ForeignKey(Account, on_delete=models.CASCADE)
     account_type_choices = [
         ('savings_account', 'savings_account'),
         ('checking_account', 'checking_account'),

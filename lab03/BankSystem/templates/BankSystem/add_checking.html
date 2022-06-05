@@ -1,9 +1,11 @@
 <!-- 支票账户 -->
 {% extends "base.html" %}
 {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'BankSystem/style.css' %}">
+
 <!-- 写入 client.html 中定义的 title -->
 {% block title %}
-新增客户
+新建支票账户
 {% endblock title %}
 
 <!-- 写入 base.html 中定义的 content -->
@@ -65,7 +67,7 @@
             </div>
 
             <button>保存</button>
-            <a class="btn btn-light" href="/clients">返回</a>
+            <a class="btn btn-light" href="/accounts">返回</a>
 
             <div style="color: red;">{{ error_scat }}</div>
 

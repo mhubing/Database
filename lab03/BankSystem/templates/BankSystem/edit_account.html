@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+    编辑信息
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<body>
+<div class="container">
+    <h1>账户信息管理</h1>
+    <hr/>
+    <form action="" method="POST" class="container">
+        <fieldset class="module aligned">
+            <div class="form-row field-subbranch_name">
+                <div>
+                    <label>支行名:</label>
+                    <input type="text" name="subbranch_name" value="{{ subbranch.name }}" readonly="readonly" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-client_id">
+                <div>
+                    <label>客户:</label>
+                    <input type="text" name="client_id" value="{{ client.id }}" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-account_id">
+                <div>
+                    <label>账户号:</label>
+                    <input type="text" name="client_phone" value="{{ obj.id }}" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-address">
+                <div>
+                    <label>家庭地址:</label>
+                    <input type="text" name="client_address" value="{{ obj.address }}" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-staff_id">
+                <div>
+                    <label>负责人:</label>
+                    <input type="staff" name="client_staff_id" value="{{ obj.staff_id }}">
+                </div>
+            </div>
+
+            <div class="form-row field-staff_type">
+                <div>
+                    <label for="id_staff_type">负责人类型:</label>
+                    <select name="client_staff_type" id="id_staff_type" value="{{ obj.staff_type }}">
+                        <option value="" selected>---------请选择</option>
+                        <option value="account_principal">account principal</option>
+                        <option value="loan_principal">loan principal</option>
+                    </select>
+                </div>
+            </div>
+
+            <button>保存</button>
+            <a class="btn btn-light" href="/clients">返回</a>
+    </form>
+    </hr>
+</div>
+
+</body>
+
+{% endblock content %}
