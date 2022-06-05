@@ -23,45 +23,63 @@
 
             <div class="form-row field-client_id">
                 <div>
-                    <label>客户:</label>
-                    <input type="text" name="client_id" value="{{ client.id }}" class="vTextField">
+                    <label>客户身份证号:</label>
+                    <input type="text" name="client_id" value="{{ client.id }}" readonly="readonly" class="vTextField">
                 </div>
             </div>
 
             <div class="form-row field-account_id">
                 <div>
                     <label>账户号:</label>
-                    <input type="text" name="client_phone" value="{{ obj.id }}" class="vTextField">
+                    <input type="text" name="client_phone" value="{{ obj.id }}" readonly="readonly" class="vTextField">
                 </div>
             </div>
 
-            <div class="form-row field-address">
+            <div class="form-row field-open_date">
                 <div>
-                    <label>家庭地址:</label>
-                    <input type="text" name="client_address" value="{{ obj.address }}" class="vTextField">
+                    <label>开户日期:</label>
+                    <input type="datetime" name="open_date" value="{{ obj.open_date }}" readonly="readonly">
                 </div>
             </div>
 
-            <div class="form-row field-staff_id">
+            <div class="form-row field-account_balance">
                 <div>
-                    <label>负责人:</label>
-                    <input type="staff" name="client_staff_id" value="{{ obj.staff_id }}">
+                    <label>余额:</label>
+                    <input type="text" name="account_balance" value="{{ obj.balance }}" class="vTextField">
                 </div>
             </div>
 
-            <div class="form-row field-staff_type">
+            {% if obj.type == 'checking_account' %}
+            <div class="form-row field-account_overdraft">
                 <div>
-                    <label for="id_staff_type">负责人类型:</label>
-                    <select name="client_staff_type" id="id_staff_type" value="{{ obj.staff_type }}">
-                        <option value="" selected>---------请选择</option>
-                        <option value="account_principal">account principal</option>
-                        <option value="loan_principal">loan principal</option>
-                    </select>
+                    <label>透支额度:</label>
+                    <input type="text" name="account_overdraft" value="{{ obj.checkingaccount.overdraft }}" class="vTextField">
+                </div>
+            </div>
+            {% elif obj.type == 'savings_account' %}
+            <div class="form-row field-interest_rate">
+                <div>
+                    <label>利率:</label>
+                    <input type="text" name="interest_rate" value="{{ obj.savingsaccount.interest_rate }}" class="vTextField">
+                </div>
+            </div>
+            <div class="form-row field-currency_type">
+                <div>
+                    <label>货币类型:</label>
+                    <input type="text" name="currency_type" class="vTextField">
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-row field-least_recently_access">
+                <div>
+                    <label>修改时间:</label>
+                    <input type="datetime-local" name="least_recently_access" value="{{ timezone.now }}" class="vTextField">
                 </div>
             </div>
 
             <button>保存</button>
-            <a class="btn btn-light" href="/clients">返回</a>
+            <a class="btn btn-light" href="/accounts">返回</a>
     </form>
     </hr>
 </div>

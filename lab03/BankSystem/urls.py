@@ -20,6 +20,8 @@ urlpatterns = [
     path('accounts/add_savings', views.add_savings, name="add_savings"),
     path('accounts/edit_account/<account_id>', views.edit_account, name="edit_account"),
     path('accounts/del_account/<account_id>', views.del_account, name="delete_account"),
+    path('accounts/add_clienttoaccount/<account_id>/<account_type>', views.add_clienttoaccount, name="add_clienttoaccount"),
+    path('accounts/del_clienttoaccount/<account_id>/<client_id>', views.del_clienttoaccount, name="del_clienttoaccount"),
     path('loans', views.loans, name='loans_management'),
     path('statistics', views.statistics, name='business_statistics'),
 ]

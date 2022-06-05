@@ -1,4 +1,4 @@
-import email
+import math
 from http import client
 from locale import currency
 from multiprocessing.dummy import current_process
@@ -20,6 +20,7 @@ def home(request):
     return render(request, 'BankSystem/home.html')
     
 
+# 1.客户视图（包括查询）
 @csrf_exempt
 def clients(request):
 
@@ -45,7 +46,7 @@ def clients(request):
         context = {'clients':clients}
         return render(request, 'BankSystem/clients.html', context)
 
-
+# 2.增加客户视图
 @csrf_exempt
 def add_client(request):
     # 在数据库中插入数据
@@ -76,7 +77,7 @@ def add_client(request):
         return redirect('../clients')
     return render(request, 'BankSystem/add_client.html')
 
-
+# 3.删除客户视图
 @csrf_exempt
 def del_client(request, client_id):
     if request.method == "GET":
@@ -91,7 +92,7 @@ def del_client(request, client_id):
         return redirect('../../clients')
     return render(request, 'BankSystem/clients.html', {'error': '删除失败'})
 
-
+# 4.编辑客户视图
 @csrf_exempt
 def edit_client(request, client_id):
     obj_list = Client.objects.filter(id = client_id).values('id', 'name', 'phone', 'address', 'staff_id', 'staff_type')
@@ -119,7 +120,7 @@ def edit_client(request, client_id):
     return render(request, 'BankSystem/edit_client.html', {'obj' : obj})
 
 
-# 管理客户联系人
+# 5.客户联系人视图（包括查询）
 @csrf_exempt
 def contacts(request, client_id):
     if request.method == "GET":
@@ -140,7 +141,7 @@ def contacts(request, client_id):
         context = {'contacts':contacts, 'client_id': client_id}
         return render(request, 'BankSystem/contacts.html', context)
 
-
+# 6.增加客户联系人视图
 @csrf_exempt
 def add_contact(request, client_id):
     obj_list = Client.objects.filter(id=client_id)
@@ -173,7 +174,7 @@ def add_contact(request, client_id):
         return HttpResponseRedirect(url)
     return render(request, 'BankSystem/add_contact.html', {'client_id': client_id})
 
-    
+# 7.删除客户联系人视图
 @csrf_exempt
 def del_contact(request, client_id, contact_name):
     if request.method == "GET":
@@ -189,7 +190,7 @@ def del_contact(request, client_id, contact_name):
         return HttpResponseRedirect(url)
     return render(request, 'BankSystem/contacts.html', {'client_id': client_id, 'error': '删除失败'})
 
-
+# 8.编辑客户联系人视图
 @csrf_exempt
 def edit_contact(request, client_id, contact_name):
     obj_list = Client.objects.filter(id = client_id)
@@ -217,20 +218,21 @@ def edit_contact(request, client_id, contact_name):
         return HttpResponseRedirect(url)
     return render(request, 'BankSystem/edit_contact.html', {'obj':obj, 'client_id': client_id, 'contact_name':contact_name})
 
-
-
+# 9.账户视图（包括查询）
 @csrf_exempt
 def accounts(request):
-    # 获取全部客户信息，显示在前端
+    # 获取全部账户信息，显示在前端
     if request.method == "GET":
         accounts = Account.objects.all()
-        return render(request, 'BankSystem/accounts.html', {'accounts':accounts})
-
+        accessaccounts = AccessAccount.objects.all()
+        return render(request, 'BankSystem/accounts.html', {'accounts':accounts, 'accessaccounts':accessaccounts})
+    # 查询
+    if request.method == "POST":
+        
     return HttpResponse("need to finish account management.")
 
-
+# 10.增加支票账户视图
 @csrf_exempt
-# 支票账户
 def add_checking(request):
     if request.method == "POST":
         subbranch_name = request.POST.get('subbranch_name')
@@ -275,13 +277,18 @@ def add_checking(request):
                 account_id = Account.objects.get(id=account_id),
                 account_type = 'checking_account'
             )
+            AccessAccount.objects.create(
+                account_id = Account.objects.get(id=account_id),
+                client_id = Client.objects.get(id=client_id),
+                least_recently_access = open_day,
+            )
 
         return redirect('../accounts')
     return render(request, 'BankSystem/add_checking.html')
 
-
+# 11.增加储蓄账户视图
+# 此时只允许添加一位客户
 @csrf_exempt
-# 储蓄账户
 def add_savings(request):
     if request.method == "POST":
         subbranch_name = request.POST.get('subbranch_name')
@@ -337,7 +344,7 @@ def add_savings(request):
         return redirect('../accounts')
     return render(request, 'BankSystem/add_savings.html')
 
-
+# 12.删除账户视图
 @csrf_exempt
 def del_account(request, account_id):
     if request.method == "GET":
@@ -352,12 +359,14 @@ def del_account(request, account_id):
             Account.objects.filter(id=account_id).delete()
             SavingsAccount.objects.filter(account_id=account_id).delete()
             CheckingAccount.objects.filter(account_id=account_id).delete()
-            SubbranchClientAccountType.objects.filter(account_id=account_id).delete()
-            AccessAccount.objects.filter(account_id).delete()
+            SubbranchClientAccountType.objects.filter(**{'account_id': account_id}).delete()
+            AccessAccount.objects.filter(account_id=account_id).delete()
 
         return redirect('../../accounts')
     return render(request, 'BankSystem/accounts.html', {'error': '删除失败'})
 
+# 13.编辑账户视图
+# 默认只显示一位客户
 @csrf_exempt
 def edit_account(request, account_id):
     obj_list = Account.objects.filter(id=account_id)
@@ -367,22 +376,28 @@ def edit_account(request, account_id):
     # 涉及到先反向查询，再正向
     subbranch_list = Account.objects.get(id=account_id)
     subbranch = subbranch_list.subbranchclientaccounttype_set.all().first().subbranch_name
+    client_list = Account.objects.get(id=account_id)
+    client = client_list.subbranchclientaccounttype_set.all().first().client_id
 
     if(request.method=="POST"):
         account_balance = request.POST.get('account_balance')
+        account_overdraft = request.POST.get('account_overdraft')
         lsa = request.POST.get('least_recently_access')
-        if obj['type'] == 'checking_account':
+        if obj.type == 'checking_account':
+            # TODO:还不能实现 fabs(余额) < 透支额度
+            # if float(account_balance) < 0 and int(math.fabs(account_balance)) > int(account_overdraft):
+            #     return HttpResponse("欠款超过透支额度，修改失败")
             with transaction.atomic():
                 Account.objects.all().filter(id=account_id).update(
                     balance = account_balance,
                 )
                 CheckingAccount.objects.all().filter(account_id=account_id).update(
-                    overdraft = request.POST.get('account_overdraft'),
+                    overdraft = account_overdraft,
                 )
                 AccessAccount.objects.all().filter(account_id=account_id).update(
                     least_recently_access = lsa,
                 )
-        if obj['type'] == 'savings_account':
+        if obj.type == 'savings_account':
             with transaction.atomic():
                 Account.objects.all().filter(id=account_id).update(
                     balance = account_balance,
@@ -395,8 +410,56 @@ def edit_account(request, account_id):
                     least_recently_access = lsa,
                 )
         return redirect('../../accounts')
-    return render(request, 'BankSystem/edit_account.html', {'obj':obj, 'subbranch':subbranch})
+    return render(request, 'BankSystem/edit_account.html', {'obj':obj, 'subbranch':subbranch, 'client':client})
                     
+# 14.向账户增加客户的视图
+@csrf_exempt
+def add_clienttoaccount(request, account_id, account_type):
+    subbranch_list = Account.objects.get(id=account_id)
+    subbranch = subbranch_list.subbranchclientaccounttype_set.all().first().subbranch_name
+
+    if request.method == "POST":
+        client_id = request.POST.get('client_id')
+        if not Client.objects.filter(id=client_id):
+            return render(request, 'BankSystem/add_clienttoaccount.html', {'error':'该客户不存在', 'subbranch':subbranch, 'account_id': account_id})
+        if SubbranchClientAccountType.objects.filter(**{'subbranch_name': subbranch, 'client_id': client_id, 'account_type': account_type}):
+            return render(request, 'BankSystem/add_clienttoaccount.html', {'error':'该客户已拥有该类型账户', 'subbranch':subbranch, 'account_id': account_id})
+
+        lra = request.POST.get('lra')
+        with transaction.atomic():
+            AccessAccount.objects.create(
+                account_id = Account.objects.get(id=account_id),
+                client_id = Client.objects.get(id=client_id),
+                least_recently_access = lra,
+            )
+            SubbranchClientAccountType.objects.create(
+                subbranch_name = subbranch,
+                client_id = Client.objects.get(id=client_id),
+                account_id = Account.objects.get(id=account_id),
+                account_type = account_type,
+            )
+        return redirect('../../../accounts')
+
+    return render(request, 'BankSystem/add_clienttoaccount.html', {'subbranch':subbranch, 'account_id': account_id})
+
+
+@csrf_exempt
+def del_clienttoaccount(request, account_id, client_id):
+    if request.method == "GET":
+        if not Account.objects.filter(id=account_id):
+            return HttpResponse("该账户不存在")
+        if not Client.objects.filter(id=client_id):
+            return HttpResponse("该客户不存在")
+        if not SubbranchClientAccountType.objects.filter(**{'client_id':client_id, 'account_id':account_id}):
+            return HttpResponse("该账户不属于该客户")
+        
+        with transaction.atomic():
+            AccessAccount.objects.filter(**{'client_id':client_id, 'account_id':account_id}).delete()
+            SubbranchClientAccountType.objects.filter(**{'client_id':client_id, 'account_id':account_id}).delete()
+        return redirect('../../../accounts')
+            
+    return HttpResponse("TODO")
+
 
 def loans(request):
     return HttpResponse("need to finish loan management.")

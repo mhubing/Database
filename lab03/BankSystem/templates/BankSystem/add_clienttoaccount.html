@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+账户新增客户
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<div class="container">
+    <h1>账户新增客户</h1>
+    <hr/>
+    <body>
+        <form action="" method="POST">
+        <fieldset class="module aligned">
+            <div class="form-row field-subbranch_name">
+                <div>
+                    <label>支行名:</label>
+                    <input type="text" name="subbranch_name" value="{{ subbranch.name }}" readonly="readonly" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-account_id">
+                <div>
+                    <label>账户号:</label>
+                    <input type="text" name="account_id" value="{{account_id}}" readonly="readonly" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-client_id">
+                <div>
+                    <label>客户身份证号:</label>
+                    <input type="text" name="client_id" class="vTextField">{{ error }}
+                </div>
+            </div>
+
+            <div class="form-row field-lra">
+                <div>
+                    <label>添加时间:</label>
+                    <input type="datetime-local" name="lra" class="vTextField">
+                </div>
+            </div>
+
+            <button>保存</button>
+            <a class="btn btn-light" href="/accounts">返回</a>
+
+        </fieldset>
+        </form>
+    </body>
+    </hr>
+</div>
+
+{% endblock content %}
