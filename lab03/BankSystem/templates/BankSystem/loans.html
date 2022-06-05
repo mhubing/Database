@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+贷款管理
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<body>
+    <div class="container">
+        <h1><a href="/loans" style="color: black;">贷款管理</a></h1>
+        <hr/>
+        <div style="margin-bottom: 15px;">
+            <a class="btn btn-primary" href="loans/add_loan">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+                新增贷款</a>
+            <div style="float: right">
+                <form method="post">
+                    <div style="float: right; margin-bottom: 10px; width: 70px;">
+                        <input type="submit" value="查询" name="query" class="btn btn-primary input-sm"/>
+                    </div>
+                    <div style="float: right; width: 10px;">&nbsp;</div>
+                    <div style="float: right; margin-bottom: 10px; width: 100px;">
+                        <div class="input-group">
+                            <input type="text" style="border-radius: 5px;" name="loan_id" class="form-control" placeholder="贷款号"/>
+                        </div>
+                    </div>
+                    <div style="float: right; margin-bottom: 10px; width: 20px;">
+                        <div style="position: relative;top: 5px; left: 5px">&</div>
+                    </div>
+                    <div style="float: right; margin-bottom: 10px; width: 125px;">
+                        <div class="input-group">
+                            <input type="text" style="border-radius: 5px;" name="client_id" class="form-control" placeholder="客户身份证号"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div style="float: none" class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                贷款列表
+            </div>
+            <!-- 表格 -->
+            <table class="container table stats-table table-striped table-bordered">
+                <caption>贷款列表</caption>
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>贷款号</th>
+                        <th>支行名</th>
+                        <th>贷款金额</th>
+                        <th>贷款状态</th>
+                        <th>增加客户</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ loan.id }}</td>
+                        <td>{{ loan.subbranch.name }}</td>
+                        <td>{{ loan.amount }}</td>
+                        <td>
+                            {% if  loan.status == 'unissue' %}
+                                未开始发放
+                            {% elif  account.type == 'issuing' %}
+                                发放中
+                            {% elif  account.type == 'issued' %}
+                                已全部发放
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a  class="btn btn-primary btn-sm" href="/loans/add_clientloan/{{ loan.id }}">
+                            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span> 增加客户</a>
+                        </td>
+                        <td>
+                            <a class="btn btn-primary btn-sm" href="/loans/add_payloan/{{ loan.id }}">
+                            <span class="glyphicon glyphicon-check" aria-hidden="true"></span>发放贷款</a>
+                            <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm" href="/loans/del_loan/{{ loan.id }}">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>删除贷款</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="color: red;">{{ error_del }}</div>
+
+        <div style="float: none" class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                贷款发放列表
+            </div>
+            <!-- 表格 -->
+            <table class="container table stats-table table-striped table-bordered">
+                <caption>贷款发放列表</caption>
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>贷款号</th>
+                        <th>支付日期</th>
+                        <th>支付金额</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payloan in payloans %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ payloan.loan.id }}</td>
+                        <td>{{ payloan.pay_date }}</td>
+                        <td>{{ payloan.pay_amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="float: none" class="panel panel-default">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                贷款-客户列表
+            </div>
+            <!-- 表格 -->
+            <table class="container table stats-table table-striped table-bordered">
+                <caption>贷款-客户列表</caption>
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>贷款号</th>
+                        <th>客户身份证号</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clientloan in clientloans %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ clientloan.loan.id }}</td>
+                        <td>{{ clientloan.client.id }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    </body>
+{% endblock content %}

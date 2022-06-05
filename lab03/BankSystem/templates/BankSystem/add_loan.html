@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+<!-- 写入 client.html 中定义的 title -->
+{% block title %}
+新增贷款
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+
+<div class="container">
+    <h1>新增贷款</h1>
+    <hr/>
+    <body>
+        <form action="" method="POST">
+        <fieldset class="module aligned">
+            <div class="form-row field-subbranch_name">
+                <div>
+                    <label>支行名:</label>
+                    <input type="text" name="subbranch_name" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-loan_id">
+                <div>
+                    <label>贷款号:</label>
+                    <input type="text" name="loan_id" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-client_id">
+                <div>
+                    <label>客户身份证号:</label>
+                    <input type="text" name="client_id" class="vTextField">
+                </div>
+            </div>
+
+            <div class="form-row field-loan_amount">
+                <div>
+                    <label>贷款金额:</label>
+                    <input type="text" name="loan_amount" class="vTextField">
+                </div>
+            </div>
+
+            <!-- <div class="form-row field-staff_type">
+                <div>
+                    <label for="id_loan_status">贷款发放状态:</label>
+                    <select name="loan_status" id="loan_statuse">
+                        <option value="" selected>---------请选择</option>
+                        <option value="unissue">未开始发放</option>
+                        <option value="issuing">发放中</option>
+                        <option value="issued">已全部发放</option>
+                    </select>
+                </div>
+            </div> -->
+
+            <button>保存</button>
+            <a class="btn btn-light" href="/loans">返回</a>
+
+        </fieldset>
+        </form>
+    </body>
+    </hr>
+</div>
+
+{% endblock content %}

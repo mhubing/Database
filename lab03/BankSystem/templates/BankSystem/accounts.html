@@ -49,6 +49,7 @@
             <!-- 表格 -->
             <table class="container table stats-table table-striped table-bordered">
                 <caption>账户列表</caption>
+                <!-- TODO:显示账户所属支行 -->
                 <thead>
                     <tr>
                         <th>序号</th>
@@ -112,19 +113,19 @@
                     {% for accessaccount in accessaccounts %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ accessaccount.account_id }}</td>
-                        <td>{{ accessaccount.client_id }}</td>
+                        <td>{{ accessaccount.account_id.id }}</td>
+                        <td>{{ accessaccount.client_id.id }}</td>
                         <td>{{ accessaccount.least_recently_access }}</td>
                         <td>
                             <a onclick="return confirm('确认要删除？')" class="btn btn-danger btn-sm" href="/accounts/del_clienttoaccount/{{ accessaccount.account_id.id }}/{{ accessaccount.client_id.id }}">
-                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> 删除客户</a>
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> 从账户删除客户</a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div style="color: red;">{{ error_del }}</div>
+        <div style="color: red;">{{ error_del_c }}</div>
 
     </div>
     

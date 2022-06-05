@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 
-from .models import AccessAccount, Account, CheckingAccount, Client, Contact, SavingsAccount, Staff, Subbranch, SubbranchClientAccountType
+from .models import AccessAccount, Account, CheckingAccount, Client, Contact, SavingsAccount, Staff, Subbranch, SubbranchClientAccountType, Loan, PayLoan, ClientLoan
 
 
 def home(request):
@@ -20,6 +20,7 @@ def home(request):
     return render(request, 'BankSystem/home.html')
     
 
+"""------------------客户管理------------------"""
 # 1.客户视图（包括查询）
 @csrf_exempt
 def clients(request):
@@ -90,7 +91,7 @@ def del_client(request, client_id):
             return HttpResponse("该用户存在关联账户，不能删除")
         obj_list.delete()
         return redirect('../../clients')
-    return render(request, 'BankSystem/clients.html', {'error': '删除失败'})
+    return HttpResponse('删除失败')
 
 # 4.编辑客户视图
 @csrf_exempt
@@ -120,7 +121,8 @@ def edit_client(request, client_id):
     return render(request, 'BankSystem/edit_client.html', {'obj' : obj})
 
 
-# 5.客户联系人视图（包括查询）
+"""------------------客户联系人管理------------------"""
+# 5.一个客户的联系人视图（包括查询）
 @csrf_exempt
 def contacts(request, client_id):
     if request.method == "GET":
@@ -187,7 +189,7 @@ def del_contact(request, client_id, contact_name):
         contacts.delete()
         url = '/clients/contacts/'+client_id
         return HttpResponseRedirect(url)
-    return render(request, 'BankSystem/contacts.html', {'client_id': client_id, 'error': '删除失败'})
+    return HttpResponse('删除失败')
 
 # 8.编辑客户联系人视图
 @csrf_exempt
@@ -217,6 +219,8 @@ def edit_contact(request, client_id, contact_name):
         return HttpResponseRedirect(url)
     return render(request, 'BankSystem/edit_contact.html', {'obj':obj, 'client_id': client_id, 'contact_name':contact_name})
 
+
+"""------------------账户管理------------------"""
 # 9.账户视图（包括查询）
 @csrf_exempt
 def accounts(request):
@@ -322,7 +326,7 @@ def add_savings(request):
         account_id = request.POST.get('account_id')
         if not account_id:
             return render(request, 'BankSystem/add_checking.html', {'error_ai': '输入不能为空'})
-        if Account.objects.filter(id = account_id):
+        if Account.objects.filter(**{'id': account_id}):
             return render(request, 'BankSystem/add_checking.html', {'error_ai': '该账户已存在'})
 
         if SubbranchClientAccountType.objects.filter(**{'subbranch_name': subbranch_name, 'client_id': client_id, 'account_type': 'savings_account'}):
@@ -365,11 +369,12 @@ def add_savings(request):
 def del_account(request, account_id):
     if request.method == "GET":
         accounts=Account.objects.filter(id=account_id)
+        accessaccounts = AccessAccount.objects.filter(account_id=account_id)
         obj_list = Account.objects.filter(id=account_id).values('id', 'balance', 'open_date', 'type')
         if not obj_list:
             return HttpResponse("该账户不存在")
         if obj_list[0]['type'] == 'checking_account' and obj_list[0]['balance'] < 0:
-            return render(request, 'BankSystem/accounts.html', {'error_del': '透支额未付清，删除支票帐户失败', 'accounts': accounts})
+            return render(request, 'BankSystem/accounts.html', {'error_del': '透支额未付清，删除支票帐户失败', 'accounts': accounts, 'accessaccounts': accessaccounts})
 
         with transaction.atomic():
             Account.objects.filter(id=account_id).delete()
@@ -379,7 +384,7 @@ def del_account(request, account_id):
             AccessAccount.objects.filter(account_id=account_id).delete()
 
         return redirect('../../accounts')
-    return render(request, 'BankSystem/accounts.html', {'error': '删除失败'})
+    return HttpResponse('删除失败')
 
 # 13.编辑账户视图
 # 默认只显示一位客户
@@ -458,10 +463,12 @@ def add_clienttoaccount(request, account_id, account_type):
 
     return render(request, 'BankSystem/add_clienttoaccount.html', {'subbranch':subbranch, 'account_id': account_id})
 
-
+# 15.删除账户的一个客户
 @csrf_exempt
 def del_clienttoaccount(request, account_id, client_id):
     if request.method == "GET":
+        accounts=Account.objects.filter(id=account_id)
+        accessaccounts = AccessAccount.objects.filter(account_id=account_id)
         if not Account.objects.filter(id=account_id):
             return HttpResponse("该账户不存在")
         if not Client.objects.filter(id=client_id):
@@ -469,17 +476,76 @@ def del_clienttoaccount(request, account_id, client_id):
         if not SubbranchClientAccountType.objects.filter(**{'client_id':client_id, 'account_id':account_id}):
             return HttpResponse("该账户不属于该客户")
         
+        if Client.objects.filter(id=client_id).count()==1:
+            return render(request, 'BankSystem/accounts.html', {'error_del_c': '该账户仅有一个客户，不运行进行客户删除', 'accounts': accounts, 'accessaccounts': accessaccounts})
+
         with transaction.atomic():
             AccessAccount.objects.filter(**{'client_id':client_id, 'account_id':account_id}).delete()
             SubbranchClientAccountType.objects.filter(**{'client_id':client_id, 'account_id':account_id}).delete()
         return redirect('../../../accounts')
             
-    return HttpResponse("TODO")
+    return HttpResponse('删除失败')
 
 
+"""------------------贷款管理------------------"""
+# 16.贷款视图
 def loans(request):
+    # 获取贷款信息，显示在前端
+    if request.method == "GET":
+        loans = Loan.objects.all()
+        payloans = PayLoan.objects.all()
+        clientloans = ClientLoan.objects.all()
+        return render(request, 'BankSystem/loans.html', {'loans':loans, 'payloans':payloans, "clientloans":clientloans})
+    # 查询
     return HttpResponse("need to finish loan management.")
 
+# 17.新增贷款视图
+@csrf_exempt
+def add_loan(request):
+    if request.method == "POST":
+        loan_id = request.POST.get('loan_id')
+        if not loan_id:
+            return render(request, 'BankSystem/add_loan.html', {'error_li': '输入不能为空'})
+        if Loan.objects.filter(id=loan_id):
+            return render(request, 'BankSystem/add_loan.html', {'error_li': '该贷款号已存在'})
+
+        subbranch_name = request.POST.get('subbranch_name')
+        if not subbranch_name:
+            return render(request, 'BankSystem/add_loan.html', {'error_sn': '输入不能为空'})
+        if not Subbranch.objects.filter(name = subbranch_name):
+            return render(request, 'BankSystem/add_loan.html', {'error_sn': '该支行不存在'})
+
+        client_id = request.POST.get('client_id')
+        if not client_id:
+            return render(request, 'BankSystem/add_checking.html', {'error_ci': '输入不能为空'})
+        if not Client.objects.filter(id = client_id):
+            return render(request, 'BankSystem/add_checking.html', {'error_ci': '该客户不存在'})
+
+        loan_amount = request.POST.get('loan_amount')
+        if not loan_amount:
+            return render(request, 'BankSystem/add_loan.html', {'error_la': '输入不能为空'})
+        
+        with transaction.atomic():
+            Loan.objects.create(
+                id = loan_id,
+                subbranch = Subbranch.objects.get(name=subbranch_name),
+                amount = loan_amount,
+                status = 'unissue',
+            )
+            ClientLoan.objects.create(
+                loan = Loan.objects.get(id=loan_id),
+                client = Client.objects.get(id=client_id),
+            )
+        
+        return redirect('../loans')
+    return render(request, 'BankSystem/add_loan.html')
+
+# 18.给贷款增加客户
+def add_clientloan(request, loan_id):
+    pass
+
+"""------------------贷款管理------------------"""
+# 业务统计视图
 def statistics(request):
     return HttpResponse("need to finish business statistics.")
 

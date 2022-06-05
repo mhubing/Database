@@ -49,7 +49,7 @@
             {% for contact in contacts %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ contact.client_id }}</td>
+                <td>{{ contact.client_id.id }}</td>
                 <td>{{ contact.name }}</td>
                 <td>{{ contact.phone }}</td>
                 <td>{{ contact.email }}</td>

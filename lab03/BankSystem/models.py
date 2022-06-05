@@ -128,13 +128,14 @@ class AccessAccount(models.Model):
 # 10.贷款表 Loan
 class Loan(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
-    subbranch_name = models.ForeignKey(Subbranch, on_delete=models.CASCADE, verbose_name="subbranch_name")
-    loan_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0.0)
-    loan_status_choices = [
+    subbranch = models.ForeignKey(Subbranch, on_delete=models.CASCADE, verbose_name="subbranch_name")
+    amount = models.DecimalField(max_digits=20, decimal_places=2, default=0.0)
+    status_choices = [
+        ('unissue', 'unissue'),
         ('issuing', 'issuing'),
         ('issued', 'issued'),
     ]
-    loan_status = models.CharField(max_length=20, choices=loan_status_choices, default='issued')
+    status = models.CharField(max_length=20, choices=status_choices, default='unissue')
 
     class Meta:
         db_table = "Loan"
@@ -142,7 +143,7 @@ class Loan(models.Model):
 
 # 11.支付贷款表 PayLoan
 class PayLoan(models.Model):
-    loan_id = models.ForeignKey(Loan, on_delete=models.CASCADE, verbose_name="loan_id")
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, verbose_name="loan_id")
     pay_date = models.DateTimeField(auto_now_add=True)
     pay_amount = models.DecimalField(max_digits=20, decimal_places=2)
 
@@ -155,8 +156,8 @@ class PayLoan(models.Model):
 
 # 12.客户_贷款表 ClientLoan
 class ClientLoan(models.Model):
-    loan_id = models.ForeignKey(Loan, on_delete=models.CASCADE, verbose_name="loan_id")
-    client_id = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client_id")
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, verbose_name="loan_id")
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client_id")
 
     class Meta:
         constraints = [
