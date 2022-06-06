@@ -54,6 +54,7 @@
                     <tr>
                         <th>序号</th>
                         <th>账户号</th>
+                        <th>开户银行</th>
                         <th>账户类型</th>
                         <th>余额</th>
                         <th>开户日期</th>
@@ -66,6 +67,7 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ account.id }}</td>
+                        <td>{{ account.subbranchclientaccounttype_set.first.subbranch_name.name }}</td>
                         <td>
                             {% if  account.type == 'checking_account' %}
                                 支票账户

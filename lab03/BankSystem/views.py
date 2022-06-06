@@ -1,4 +1,3 @@
-import math
 from http import client
 from locale import currency
 from multiprocessing.dummy import current_process
@@ -8,11 +7,11 @@ from typing import overload
 from django.shortcuts import redirect, render
 # Create your views here.
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
 
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
 from django.db.models import Avg, Count, Min, Sum
+from django.db.models.functions import TruncMonth, TruncQuarter, TruncYear
 
 from .models import AccessAccount, Account, CheckingAccount, Client, Contact, SavingsAccount, Staff, Subbranch, SubbranchClientAccountType, Loan, PayLoan, ClientLoan
 
@@ -407,9 +406,9 @@ def edit_account(request, account_id):
         account_overdraft = request.POST.get('account_overdraft')
         lsa = request.POST.get('least_recently_access')
         if obj.type == 'checking_account':
-            # TODO:还不能实现 fabs(余额) < 透支额度
-            # if float(account_balance) < 0 and int(math.fabs(account_balance)) > int(account_overdraft):
-            #     return HttpResponse("欠款超过透支额度，修改失败")
+            # fabs(余额) < 透支额度
+            if Decimal(account_balance) < Decimal(0) and Decimal(account_balance) + Decimal(account_overdraft) < 0:
+                return HttpResponse("欠款超过透支额度，修改失败")
             with transaction.atomic():
                 Account.objects.all().filter(id=account_id).update(
                     balance = account_balance,
@@ -421,6 +420,8 @@ def edit_account(request, account_id):
                     least_recently_access = lsa,
                 )
         if obj.type == 'savings_account':
+            if Decimal(account_balance) < Decimal(0):
+                return HttpResponse("储蓄账户不能透支")
             with transaction.atomic():
                 Account.objects.all().filter(id=account_id).update(
                     balance = account_balance,
@@ -648,6 +649,146 @@ def del_loan(request, loan_id):
 """------------------业务统计------------------"""
 # 业务统计视图
 def statistics(request):
-    # 合肥
-    return render(request, 'BankSystem/statistics.html')
+    hefei_branch = Subbranch.objects.filter(name='HeFei Subbranch')
+    nanyang_branch = Subbranch.objects.filter(name='nanyang Subbranch')
+
+    # 储蓄-合肥支行
+    accounts_hefei = SubbranchClientAccountType.objects.filter(subbranch_name__in=hefei_branch).values('account_id')
+    savings_accounts = SavingsAccount.objects.filter(account_id__in=accounts_hefei).values('account_id')
+    # 储蓄-合肥支行-月
+    savings_hefei_month = AccessAccount.objects.filter(**{'account_id__in': savings_accounts}) \
+        .annotate(month=TruncMonth('least_recently_access')).values('month') \
+        .values('account_id')
+    
+    savings_hefei_amount = Account.objects.filter(id__in=savings_hefei_month) \
+        .aggregate(month_amount=Sum('balance'))
+    savings_hefei_client = SubbranchClientAccountType.objects.filter(account_id__in=savings_hefei_month) \
+        .aggregate(month_clients=Count('client_id'))
+
+    # 储蓄-合肥支行-季
+    savings_hefei_quarter = AccessAccount.objects.filter(**{'account_id__in': savings_accounts}) \
+        .annotate(quarter=TruncQuarter('least_recently_access')).values('quarter') \
+        .values('account_id')
+    
+    savings_hefei_amount.update(Account.objects.filter(id__in=savings_hefei_quarter) \
+        .aggregate(quarter_amount=Sum('balance')))
+    savings_hefei_client.update(SubbranchClientAccountType.objects.filter(account_id__in=savings_hefei_quarter) \
+        .aggregate(quarter_clients=Count('client_id')))
+
+    # 储蓄-合肥支行-年
+    savings_hefei_year = AccessAccount.objects.filter(**{'account_id__in': savings_accounts}) \
+        .annotate(year=TruncYear('least_recently_access')).values('year') \
+        .values('account_id')
+    
+    savings_hefei_amount.update(Account.objects.filter(id__in=savings_hefei_year) \
+        .aggregate(year_amount=Sum('balance')))
+    savings_hefei_client.update(SubbranchClientAccountType.objects.filter(account_id__in=savings_hefei_year) \
+        .aggregate(year_clients=Count('client_id')))
+
+
+    # 贷款-合肥支行
+    loan_hefei = Loan.objects.filter(subbranch__in=hefei_branch)
+
+    # 贷款-合肥支行-月
+    loan_hefei_month = PayLoan.objects.filter(loan__in=loan_hefei) \
+        .annotate(month=TruncMonth('pay_date')).values('month') \
+        .values('loan')
+
+    loan_hefei_amount = loan_hefei_month.aggregate(month_amount=Sum('pay_amount'))
+    loan_hefei_client = ClientLoan.objects.filter(loan__in=loan_hefei_month) \
+        .aggregate(month_clients=Count('client'))
+
+    # 贷款-合肥支行-季
+    loan_hefei_quarter = PayLoan.objects.filter(loan__in=loan_hefei) \
+        .annotate(quarter=TruncQuarter('pay_date')).values('quarter') \
+        .values('loan')
+
+    loan_hefei_amount.update(loan_hefei_quarter.aggregate(quarter_amount=Sum('pay_amount')))
+    loan_hefei_client.update(ClientLoan.objects.filter(loan__in=loan_hefei_quarter) \
+        .aggregate(quarter_clients=Count('client')))
+
+    # 贷款-合肥支行-年
+    loan_hefei_year = PayLoan.objects.filter(loan__in=loan_hefei) \
+        .annotate(year=TruncYear('pay_date')).values('year') \
+        .values('loan')
+
+    loan_hefei_amount.update(loan_hefei_year.aggregate(year_amount=Sum('pay_amount')))
+    loan_hefei_client.update(ClientLoan.objects.filter(loan__in=loan_hefei_year) \
+        .aggregate(year_clients=Count('client')))
+
+
+    # 储蓄-南阳支行TODO:
+    accounts_nanyang = SubbranchClientAccountType.objects.filter(subbranch_name__in=nanyang_branch).values('account_id')
+    savings_accounts = SavingsAccount.objects.filter(account_id__in=accounts_nanyang).values('account_id')
+    # 储蓄-南阳支行-月
+    savings_nanyang_month = AccessAccount.objects.filter(**{'account_id__in': savings_accounts}) \
+        .annotate(month=TruncMonth('least_recently_access')).values('month') \
+        .values('account_id')
+    
+    savings_nanyang_amount = Account.objects.filter(id__in=savings_nanyang_month) \
+        .aggregate(month_amount=Sum('balance'))
+    savings_nanyang_client = SubbranchClientAccountType.objects.filter(account_id__in=savings_nanyang_month) \
+        .aggregate(month_clients=Count('client_id'))
+
+    # 储蓄-南阳支行-季
+    savings_nanyang_quarter = AccessAccount.objects.filter(**{'account_id__in': savings_accounts}) \
+        .annotate(quarter=TruncQuarter('least_recently_access')).values('quarter') \
+        .values('account_id')
+    
+    savings_nanyang_amount.update(Account.objects.filter(id__in=savings_nanyang_quarter) \
+        .aggregate(quarter_amount=Sum('balance')))
+    savings_nanyang_client.update(SubbranchClientAccountType.objects.filter(account_id__in=savings_nanyang_quarter) \
+        .aggregate(quarter_clients=Count('client_id')))
+
+    # 储蓄-南阳支行-年
+    savings_nanyang_year = AccessAccount.objects.filter(**{'account_id__in': savings_accounts}) \
+        .annotate(year=TruncYear('least_recently_access')).values('year') \
+        .values('account_id')
+    
+    savings_nanyang_amount.update(Account.objects.filter(id__in=savings_nanyang_year) \
+        .aggregate(year_amount=Sum('balance')))
+    savings_nanyang_client.update(SubbranchClientAccountType.objects.filter(account_id__in=savings_nanyang_year) \
+        .aggregate(year_clients=Count('client_id')))
+
+
+
+    # 贷款-南阳支行
+    loan_nanyang = Loan.objects.filter(subbranch__in=nanyang_branch)
+
+    # 贷款-南阳支行-月
+    loan_nanyang_month = PayLoan.objects.filter(loan__in=loan_nanyang) \
+        .annotate(month=TruncMonth('pay_date')).values('month') \
+        .values('loan')
+
+    loan_nanyang_amount = loan_nanyang_month.aggregate(month_amount=Sum('pay_amount'))
+    loan_nanyang_client = ClientLoan.objects.filter(loan__in=loan_nanyang_month) \
+        .aggregate(month_clients=Count('client'))
+
+    # 贷款-南阳支行-季
+    loan_nanyang_quarter = PayLoan.objects.filter(loan__in=loan_nanyang) \
+        .annotate(quarter=TruncQuarter('pay_date')).values('quarter') \
+        .values('loan')
+
+    loan_nanyang_amount.update(loan_nanyang_quarter.aggregate(quarter_amount=Sum('pay_amount')))
+    loan_nanyang_client.update(ClientLoan.objects.filter(loan__in=loan_nanyang_quarter) \
+        .aggregate(quarter_clients=Count('client')))
+
+    # 贷款-南阳支行-年
+    loan_nanyang_year = PayLoan.objects.filter(loan__in=loan_nanyang) \
+        .annotate(year=TruncYear('pay_date')).values('year') \
+        .values('loan')
+
+    loan_nanyang_amount.update(loan_nanyang_year.aggregate(year_amount=Sum('pay_amount')))
+    loan_nanyang_client.update(ClientLoan.objects.filter(loan__in=loan_nanyang_year) \
+        .aggregate(year_clients=Count('client')))
+
+
+    context = {
+        'savings_hefei_amount':savings_hefei_amount, 'savings_hefei_client': savings_hefei_client, \
+        'loan_hefei_amount':loan_hefei_amount,'loan_hefei_client': loan_hefei_client, \
+        'savings_nanyang_amount':savings_nanyang_amount ,'savings_nanyang_client': savings_nanyang_client, \
+        'loan_nanyang_amount':loan_nanyang_amount ,'loan_nanyang_client': loan_nanyang_client
+        }
+
+    return render(request, 'BankSystem/statistics.html', context)
 
