@@ -314,21 +314,21 @@ def add_savings(request):
     if request.method == "POST":
         subbranch_name = request.POST.get('subbranch_name')
         if not subbranch_name:
-            return render(request, 'BankSystem/add_checking.html', {'error_sn': '输入不能为空'})
+            return render(request, 'BankSystem/add_savings.html', {'error_sn': '输入不能为空'})
         if not Subbranch.objects.filter(name = subbranch_name):
-            return render(request, 'BankSystem/add_checking.html', {'error_sn': '该支行不存在'})
+            return render(request, 'BankSystem/add_savings.html', {'error_sn': '该支行不存在'})
         
         client_id = request.POST.get('client_id')
         if not client_id:
-            return render(request, 'BankSystem/add_checking.html', {'error_ci': '输入不能为空'})
+            return render(request, 'BankSystem/add_savings.html', {'error_ci': '输入不能为空'})
         if not Client.objects.filter(id = client_id):
-            return render(request, 'BankSystem/add_checking.html', {'error_ci': '该客户不存在'})
+            return render(request, 'BankSystem/add_savings.html', {'error_ci': '该客户不存在'})
 
         account_id = request.POST.get('account_id')
         if not account_id:
-            return render(request, 'BankSystem/add_checking.html', {'error_ai': '输入不能为空'})
+            return render(request, 'BankSystem/add_savings.html', {'error_ai': '输入不能为空'})
         if Account.objects.filter(**{'id': account_id}):
-            return render(request, 'BankSystem/add_checking.html', {'error_ai': '该账户已存在'})
+            return render(request, 'BankSystem/add_savings.html', {'error_ai': '该账户已存在'})
 
         if SubbranchClientAccountType.objects.filter(**{'subbranch_name': subbranch_name, 'client_id': client_id, 'account_type': 'savings_account'}):
             return render(request, 'BankSystem/add_savings.html', {'error_scat': '客户在该支行已拥有储蓄账户'})
